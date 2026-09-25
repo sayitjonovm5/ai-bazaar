@@ -8,12 +8,14 @@ import { Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
+  const [trendingProducts, setTrendingProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { data: session } = useSession();
 
   useEffect(() => {
     if (!session?.user) {
       setPinnedProducts([]);
+      setTrendingProducts([]);
       setIsLoading(false);
       return;
     }
@@ -23,9 +25,14 @@ export default function Dashboard() {
       fetch("/api/user/pins").then(res => res.json())
     ])
     .then(([allProducts, pinnedIds]) => {
-      if (Array.isArray(allProducts) && Array.isArray(pinnedIds)) {
-        const pinned = allProducts.filter(p => pinnedIds.includes(p.id));
-        setPinnedProducts(pinned);
+      if (Array.isArray(allProducts)) {
+        const changed = allProducts.filter(p => p.changePercent !== 0);
+        setTrendingProducts(changed);
+        
+        if (Array.isArray(pinnedIds)) {
+          const pinned = allProducts.filter(p => pinnedIds.includes(p.id));
+          setPinnedProducts(pinned);
+        }
       }
       setIsLoading(false);
     })
@@ -62,7 +69,54 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto py-6">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">My Dashboard</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6">My Dashboard</h1>
+
+      {trendingProducts.length > 0 && (
+        <div className="w-full bg-white border border-gray-200 rounded-lg overflow-hidden relative h-12 flex items-center mb-8 shadow-sm">
+          <style>{`
+            @keyframes ticker {
+              0% { transform: translateX(0); }
+              100% { transform: translateX(-100%); }
+            }
+            .animate-ticker {
+              animation: ticker 30s linear infinite;
+              display: inline-flex;
+              white-space: nowrap;
+              padding-left: 100%;
+            }
+            .animate-ticker:hover {
+              animation-play-state: paused;
+            }
+          `}</style>
+          <div className="flex-shrink-0 bg-blue-600 text-white font-semibold text-sm px-4 h-full flex items-center z-10 shadow-md">
+            Market Trends
+          </div>
+          <div className="animate-ticker flex space-x-12 items-center px-4">
+            {trendingProducts.map((p, i) => (
+              <div key={i} className="flex items-center space-x-2 text-sm font-medium">
+                <Link href={`/product/${p.id}`} className="text-gray-700 hover:text-blue-600 hover:underline">
+                  {p.name}
+                </Link>
+                {p.changePercent > 0 ? (
+                  <span className="text-green-600 flex items-center bg-green-50 px-2 py-0.5 rounded-md">
+                    <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                    </svg>
+                    +{p.changePercent}%
+                  </span>
+                ) : (
+                  <span className="text-red-600 flex items-center bg-red-50 px-2 py-0.5 rounded-md">
+                    <svg className="w-3.5 h-3.5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    {p.changePercent}%
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       
       {pinnedProducts.length === 0 ? (
         <div className="flex flex-col items-center justify-center p-16 bg-white rounded-2xl border border-dashed border-gray-300 shadow-sm">
