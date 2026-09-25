@@ -7,7 +7,7 @@ import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User }
 import Image from "next/image";
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Search Products", href: "/search", icon: Search },
   { name: "AI Analyst Chat", href: "/chat", icon: MessageSquare },
   { name: "Settings", href: "/settings", icon: Settings },

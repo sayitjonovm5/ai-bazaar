@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Sidebar from "@/components/Sidebar";
 import Providers from "@/components/Providers";
+import AppShell from "@/components/AppShell";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NarxNazar",
-  description: "AI-Powered Market Intelligence, Pricing, and B2B Procurement Platform",
+  title: "NarxNazar • UZEX Birja Tahlili va AI Narxlar Prognozi",
+  description: "O'zbekiston tovar-xom ashyo birjasi narxlari tahlili, Chronos-T5 AI prognozi va B2B savdo platformasi",
 };
 
 export default function RootLayout({
@@ -26,17 +26,17 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="uz"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased scroll-smooth`}
     >
-      <body className="flex h-screen bg-gray-50 overflow-hidden">
+      <body className="h-full">
         <Providers>
-          <Sidebar />
-          <main className="flex-1 overflow-y-auto p-8">
+          <AppShell>
             {children}
-          </main>
+          </AppShell>
         </Providers>
       </body>
     </html>
   );
 }
+
