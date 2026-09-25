@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Menu, X, Sparkles, ChevronDown } from "lucide-react";
+import { ArrowRight, Menu, X, ChevronDown } from "lucide-react";
 import { useSession, signIn } from "next-auth/react";
 
 export default function LandingNavbar() {
@@ -11,97 +11,88 @@ export default function LandingNavbar() {
   const { data: session } = useSession();
 
   return (
-    <header className="sticky top-0 z-50 w-full transition-all backdrop-blur-xl bg-white/70 border-b border-slate-200/60 shadow-xs">
+    <header className="sticky top-0 z-50 w-full transition-all backdrop-blur-md bg-white/75 border-b border-slate-100 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-18">
           
-          {/* Brand Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative flex items-center justify-center w-10 h-10 rounded-xl overflow-hidden shadow-xs transition-transform group-hover:scale-105">
-              <Image 
-                src="/logo.png" 
-                alt="NarxNazar Logo" 
-                width={40} 
-                height={40} 
-                className="object-contain"
-                priority
-              />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex items-center space-x-1.5">
-                <span className="text-xl font-bold tracking-tight text-slate-900 group-hover:text-orange-600 transition-colors">
-                  Narx<span className="text-orange-500">Nazar</span>
-                </span>
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-orange-100 text-orange-700 tracking-wide uppercase">
-                  AI Birja
-                </span>
+          {/* Brand Logo with Colorful Circle Mark like in the uploaded image */}
+          <Link href="/" className="flex items-center space-x-2.5 group">
+            <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-tr from-rose-500 via-indigo-600 to-sky-400 p-[2px] shadow-xs group-hover:scale-105 transition-transform">
+              <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
+                <div className="w-3.5 h-3.5 rounded-full bg-gradient-to-br from-indigo-600 via-purple-500 to-rose-500" />
               </div>
-              <span className="text-[10px] text-slate-500 font-medium tracking-tight -mt-0.5">
-                UZEX Analytics & Forecasting
+            </div>
+            <div className="flex items-center space-x-1.5">
+              <span className="text-xl font-extrabold tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
+                overflow<span className="text-indigo-600 font-black">.io</span>
+              </span>
+              <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 tracking-wide">
+                by NarxNazar
               </span>
             </div>
           </Link>
 
-          {/* Center Navigation Links (Overflow style) */}
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-600">
+          {/* Center Navigation Links (Matching Uploaded Screenshot: Product, Resources, Examples, Download, Pricing) */}
+          <nav className="hidden md:flex items-center space-x-7 text-sm font-medium text-slate-600">
             <Link 
               href="#mockup" 
               className="flex items-center hover:text-slate-900 transition-colors py-2"
             >
-              Mahsulotlar
-              <ChevronDown className="w-3.5 h-3.5 ml-1 opacity-60" />
+              Product
+              <ChevronDown className="w-3.5 h-3.5 ml-1 text-slate-400" />
             </Link>
             <Link 
               href="#features" 
-              className="hover:text-slate-900 transition-colors py-2"
+              className="flex items-center hover:text-slate-900 transition-colors py-2"
             >
-              Imkoniyatlar
+              Resources
+              <ChevronDown className="w-3.5 h-3.5 ml-1 text-slate-400" />
             </Link>
             <Link 
               href="#mockup" 
-              className="flex items-center hover:text-slate-900 transition-colors py-2"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-amber-500 mr-1.5" />
-              Chronos AI
-            </Link>
-            <Link 
-              href="#how-it-works" 
               className="hover:text-slate-900 transition-colors py-2"
             >
-              Qanday ishlaydi?
+              Examples
+            </Link>
+            <Link 
+              href="/dashboard" 
+              className="hover:text-slate-900 transition-colors py-2"
+            >
+              Download
             </Link>
             <Link 
               href="#pricing" 
               className="hover:text-slate-900 transition-colors py-2"
             >
-              Tariflar
+              Pricing
             </Link>
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-5">
             {session ? (
               <Link
                 href="/dashboard"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-slate-700 hover:text-slate-900 transition-colors"
+                className="text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors"
               >
                 Dashboard
               </Link>
             ) : (
               <button
                 onClick={() => signIn("credentials")}
-                className="text-sm font-medium text-slate-700 hover:text-slate-950 transition-colors px-3 py-2 cursor-pointer"
+                className="text-sm font-semibold text-slate-700 hover:text-slate-950 transition-colors cursor-pointer"
               >
-                Kirish
+                Sign In
               </button>
             )}
 
+            {/* Black Pill Button 'Start for free ->' exactly like the image */}
             <Link
               href="/dashboard"
-              className="group inline-flex items-center justify-center px-4.5 py-2 text-sm font-medium text-white bg-slate-950 hover:bg-slate-800 rounded-full shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
+              className="group inline-flex items-center justify-center px-5 py-2.5 text-sm font-semibold text-white bg-black hover:bg-slate-900 rounded-full shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 cursor-pointer"
             >
-              <span>Bepul boshlash</span>
-              <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+              <span>Start for free</span>
+              <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-1" />
             </Link>
           </div>
 
@@ -127,36 +118,36 @@ export default function LandingNavbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
           >
-            Mahsulotlar
+            Product
           </Link>
           <Link
             href="#features"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
           >
-            Imkoniyatlar
+            Resources
           </Link>
           <Link
-            href="#how-it-works"
+            href="#mockup"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
           >
-            Qanday ishlaydi?
+            Examples
           </Link>
           <Link
             href="#pricing"
             onClick={() => setMobileMenuOpen(false)}
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
           >
-            Tariflar
+            Pricing
           </Link>
           <div className="pt-4 border-t border-slate-100 flex flex-col space-y-2">
             <Link
               href="/dashboard"
               onClick={() => setMobileMenuOpen(false)}
-              className="w-full text-center py-2.5 px-4 rounded-full text-sm font-medium bg-slate-950 text-white"
+              className="w-full text-center py-2.5 px-4 rounded-full text-sm font-semibold bg-black text-white"
             >
-              Bepul boshlash →
+              Start for free →
             </Link>
           </div>
         </div>
