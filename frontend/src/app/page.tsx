@@ -79,7 +79,7 @@ export default function Dashboard() {
               100% { transform: translateX(-100%); }
             }
             .animate-ticker {
-              animation: ticker 400s linear infinite;
+              animation: ticker 1200s linear infinite;
               display: inline-flex;
               white-space: nowrap;
               padding-left: 100%;
@@ -94,7 +94,11 @@ export default function Dashboard() {
           <div className="animate-ticker flex space-x-12 items-center px-4">
             {trendingProducts.map((p, i) => (
               <div key={i} className="flex items-center space-x-2 text-sm font-medium">
-                <Link href={`/product/${p.id}`} className="text-gray-700 hover:text-blue-600 hover:underline">
+                <Link 
+                  href={`/product/${p.id}`} 
+                  className="text-gray-700 hover:text-blue-600 hover:underline truncate max-w-[250px] block"
+                  title={p.name}
+                >
                   {p.name}
                 </Link>
                 {p.changePercent > 0 ? (
