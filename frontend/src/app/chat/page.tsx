@@ -12,25 +12,51 @@ export default function ChatPage() {
     },
   ]);
   const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSend = (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
 
-    setMessages([...messages, { id: Date.now(), role: "user", content: input }]);
+    const userMessage = input.trim();
+    setMessages(prev => [...prev, { id: Date.now(), role: "user", content: userMessage }]);
     setInput("");
+    setIsLoading(true);
     
-    // Simulate AI thinking (this will be replaced with real backend logic later)
-    setTimeout(() => {
-      setMessages((prev) => [
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: userMessage }),
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong communicating with the AI.");
+      }
+      
+      setMessages(prev => [
         ...prev,
         {
           id: Date.now(),
           role: "assistant",
-          content: "I am a prototype interface. My AI backend hasn't been connected yet, but soon I'll be able to analyze this data for you!",
+          content: data.reply,
         },
       ]);
-    }, 1000);
+    } catch (err: any) {
+      console.error(err);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: `⚠️ Error: ${err.message}`,
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -48,11 +74,23 @@ export default function ChatPage() {
               <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}>
                 {msg.role === "user" ? <User size={20} /> : <Bot size={20} />}
               </div>
-              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-900 rounded-tl-none"}`}>
+              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-900 rounded-tl-none whitespace-pre-wrap"}`}>
                 {msg.content}
               </div>
             </div>
           ))}
+          {isLoading && (
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600">
+                <Bot size={20} />
+              </div>
+              <div className="px-5 py-3 rounded-2xl max-w-[80%] bg-gray-100 text-gray-900 rounded-tl-none flex items-center gap-1">
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
+                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Chat Input */}
@@ -60,14 +98,16 @@ export default function ChatPage() {
           <form onSubmit={handleSend} className="relative flex items-center">
             <input
               type="text"
+              disabled={isLoading}
               placeholder="Ask about price trends, e.g., 'Why did cement go up today?'"
-              className="w-full pl-6 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+              className="w-full pl-6 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm disabled:opacity-50"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
             <button
               type="submit"
-              className="absolute right-2 p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+              disabled={isLoading}
+              className="absolute right-2 p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={20} />
             </button>
