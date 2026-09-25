@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       console.error("Error reading RAG context:", e);
     }
 
-    const systemPrompt = `Siz Bozor-Analitika sun'iy intellekt tahlilchisisiz. Siz foydalanuvchilarga O'zbekistondagi B2B bozor narxlarini tushunishga yordam berasiz. Har doim faqat O'zbek tilida javob bering. Qisqa va aniq yozing.`;
+    const systemPrompt = `You are the Bozor-Analitika AI Analyst. You help users understand B2B market prices in Uzbekistan. Be concise and helpful.`;
     
     const finalPrompt = contextData 
       ? `${systemPrompt}\n\n${contextData}\nUser Question: ${message}\nAnswer:` 
