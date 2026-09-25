@@ -52,6 +52,12 @@ export default function LandingNavbar() {
               <ChevronDown className="w-3.5 h-3.5 ml-1 opacity-60" />
             </Link>
             <Link 
+              href="/marketplace" 
+              className="hover:text-slate-900 transition-colors py-2 font-medium"
+            >
+              Marketplace
+            </Link>
+            <Link 
               href="#features" 
               className="hover:text-slate-900 transition-colors py-2"
             >
@@ -128,6 +134,13 @@ export default function LandingNavbar() {
             className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
           >
             Mahsulotlar
+          </Link>
+          <Link
+            href="/marketplace"
+            onClick={() => setMobileMenuOpen(false)}
+            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Marketplace
           </Link>
           <Link
             href="#features"
