@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { LineChart, Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Plus, Building2, Phone } from "lucide-react";
+import { Plus, Building2, Phone, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
+  const { data: session } = useSession();
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
   const [newSupplier, setNewSupplier] = useState({ name: "", price: "", description: "", contact: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
   
   const [chartData, setChartData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,11 +37,52 @@ export default function ProductDetailsPage() {
       });
   }, [id]);
 
-  const handleAddSupplier = (e: React.FormEvent) => {
+  // Fetch suppliers
+  useEffect(() => {
+    if (!id) return;
+    
+    fetch(`/api/product/${id}/suppliers`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setSuppliers(data);
+        }
+        setIsLoadingSuppliers(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoadingSuppliers(false);
+      });
+  }, [id]);
+
+  const handleAddSupplier = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuppliers([...suppliers, { ...newSupplier, id: Date.now() }]);
-    setNewSupplier({ name: "", price: "", description: "", contact: "" });
-    setShowAddForm(false);
+    if (!session?.user) {
+      alert("Please sign in to publish an offer.");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      const res = await fetch(`/api/product/${id}/suppliers`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newSupplier)
+      });
+      
+      if (!res.ok) throw new Error("Failed to post offer");
+      
+      const newOffer = await res.json();
+      setSuppliers(prev => [...prev, newOffer]);
+      setNewSupplier({ name: "", price: "", description: "", contact: "" });
+      setShowAddForm(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to submit offer.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,7 +156,13 @@ export default function ProductDetailsPage() {
           <div className="p-4 bg-white border-b border-gray-200 flex items-center justify-between">
             <h3 className="font-bold text-gray-900">B2B Sources</h3>
             <button 
-              onClick={() => setShowAddForm(!showAddForm)}
+              onClick={() => {
+                if (!session?.user) {
+                  alert("Please sign in to list your store.");
+                  return;
+                }
+                setShowAddForm(!showAddForm);
+              }}
               className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               title="List your store"
             >
@@ -152,13 +204,21 @@ export default function ProductDetailsPage() {
                   value={newSupplier.description}
                   onChange={e => setNewSupplier({...newSupplier, description: e.target.value})}
                 />
-                <button type="submit" className="w-full py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-                  Publish Offer
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full py-2 flex items-center justify-center bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Publish Offer"}
                 </button>
               </form>
             )}
 
-            {suppliers.length === 0 && !showAddForm ? (
+            {isLoadingSuppliers ? (
+              <div className="flex justify-center py-10">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              </div>
+            ) : suppliers.length === 0 && !showAddForm ? (
               <div className="text-center py-10 text-gray-500">
                 <Building2 className="h-12 w-12 mx-auto text-gray-300 mb-3" />
                 <p className="text-sm">No suppliers listed yet.</p>
@@ -169,7 +229,7 @@ export default function ProductDetailsPage() {
                 {suppliers.map((sup: any) => (
                   <div key={sup.id} className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-bold text-gray-900">{sup.name}</h4>
+                      <h4 className="font-bold text-gray-900">{sup.companyName || sup.name}</h4>
                       <span className="font-semibold text-emerald-600">{Number(sup.price).toLocaleString()} UZS</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">{sup.description}</p>
