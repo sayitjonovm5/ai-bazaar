@@ -30,6 +30,7 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
       price: parseFloat(body.price),
       contact: body.contact,
       description: body.description,
+      imageUrl: body.imageUrl,
       userId: (session.user as any).id
     }
   });

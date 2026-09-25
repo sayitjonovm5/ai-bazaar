@@ -14,9 +14,10 @@ export default function ProductDetailsPage() {
   
   const [showAddForm, setShowAddForm] = useState(false);
   const [suppliers, setSuppliers] = useState<any[]>([]);
-  const [newSupplier, setNewSupplier] = useState({ name: "", price: "", description: "", contact: "" });
+  const [newSupplier, setNewSupplier] = useState({ name: "", price: "", description: "", contact: "", imageUrl: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
+  const [toastMessage, setToastMessage] = useState("");
   
   const [chartData, setChartData] = useState<any[]>([]);
   const [rawData, setRawData] = useState<any[]>([]);
@@ -82,8 +83,10 @@ export default function ProductDetailsPage() {
       
       const newOffer = await res.json();
       setSuppliers(prev => [...prev, newOffer]);
-      setNewSupplier({ name: "", price: "", description: "", contact: "" });
+      setNewSupplier({ name: "", price: "", description: "", contact: "", imageUrl: "" });
       setShowAddForm(false);
+      setToastMessage("Taklifingiz muvaffaqiyatli qo'shildi va Marketplace bo'limiga yuborildi!");
+      setTimeout(() => setToastMessage(""), 4000);
     } catch (err) {
       console.error(err);
       alert("Failed to submit offer.");
@@ -95,7 +98,17 @@ export default function ProductDetailsPage() {
   const decodedName = typeof id === "string" ? decodeURIComponent(id) : "";
 
   return (
-    <div className="max-w-7xl mx-auto py-6 h-full flex flex-col">
+    <div className="max-w-7xl mx-auto py-6 h-full flex flex-col relative">
+      {toastMessage && (
+        <div className="fixed top-20 right-8 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 flex items-center gap-3 animate-in fade-in slide-in-from-top-5">
+          <div className="bg-white/20 p-1 rounded-full">
+            <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="font-medium text-sm">{toastMessage}</p>
+        </div>
+      )}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div className="flex items-center space-x-4">
           <ProductIcon name={decodedName} size="xl" showCategoryHint={true} />
@@ -253,6 +266,13 @@ export default function ProductDetailsPage() {
                   value={newSupplier.contact}
                   onChange={e => setNewSupplier({...newSupplier, contact: e.target.value})}
                 />
+                <input 
+                  type="url"
+                  placeholder="Mahsulot rasmi manzili (URL - ixtiyoriy)" 
+                  className="w-full mb-2 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={newSupplier.imageUrl}
+                  onChange={e => setNewSupplier({...newSupplier, imageUrl: e.target.value})}
+                />
                 <textarea 
                   required
                   placeholder="Yetkazib berish shartlari, izoh..." 
@@ -284,12 +304,18 @@ export default function ProductDetailsPage() {
             ) : (
               <div className="space-y-3">
                 {suppliers.map((sup: any) => (
-                  <div key={sup.id} className="p-4 bg-white rounded-xl shadow-sm border border-gray-100">
+                  <div key={sup.id} className="p-4 bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
                     <div className="flex justify-between items-start mb-2">
                       <h4 className="font-bold text-gray-900">{sup.companyName || sup.name}</h4>
-                      <span className="font-semibold text-emerald-600">{Number(sup.price).toLocaleString()} UZS</span>
+                      <span className="font-semibold text-emerald-600 whitespace-nowrap ml-2">{Number(sup.price).toLocaleString()} UZS</span>
                     </div>
-                    <p className="text-sm text-gray-600 mb-3">{sup.description}</p>
+                    {sup.imageUrl && (
+                      <div className="mb-3 w-full h-32 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={sup.imageUrl} alt={sup.companyName} className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <p className="text-sm text-gray-600 mb-3 flex-1">{sup.description}</p>
                     <a href={`tel:${sup.contact}`} className="flex items-center text-sm text-blue-600 hover:text-blue-800 font-medium">
                       <Phone className="h-3 w-3 mr-1.5" />
                       {sup.contact}

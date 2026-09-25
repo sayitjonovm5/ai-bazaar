@@ -36,6 +36,7 @@ model SupplierOffer {
   price       Float
   contact     String
   description String?
+  imageUrl    String?
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt   DateTime @default(now())

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User } from "lucide-react";
+import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User, Store } from "lucide-react";
 import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Marketplace", href: "/marketplace", icon: Store },
   { name: "Search Products", href: "/search", icon: Search },
   { name: "AI Analyst Chat", href: "/chat", icon: MessageSquare },
   { name: "Settings", href: "/settings", icon: Settings },
