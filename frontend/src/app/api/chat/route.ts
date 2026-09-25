@@ -93,6 +93,9 @@ export async function POST(req: Request) {
         model: OLLAMA_MODEL,
         prompt: finalPrompt,
         stream: false,
+        options: {
+          num_ctx: 2048
+        }
       }),
     });
 
