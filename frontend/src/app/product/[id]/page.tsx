@@ -121,6 +121,7 @@ export default function ProductDetailsPage() {
                     dataKey="forecastRange" 
                     fill="rgba(255, 0, 0, 0.15)" 
                     stroke="none" 
+                    connectNulls
                   />
                   <Line 
                     type="monotone" 
@@ -138,15 +139,10 @@ export default function ProductDetailsPage() {
                     strokeDasharray="5 5"
                     dot={{ r: 4, strokeWidth: 2, fill: "#fff" }}
                     activeDot={{ r: 6 }} 
+                    connectNulls
                   />
                 </ComposedChart>
               </ResponsiveContainer>
-            </div>
-            <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <h4 className="font-semibold text-blue-900 mb-1">AI Analyst Insight</h4>
-              <p className="text-blue-800 text-sm">
-                Based on historical trends and recent supply indicators, the price for this product is expected to slightly increase over the next week. We recommend securing current offers if your margin allows.
-              </p>
             </div>
           </div>
         </div>
