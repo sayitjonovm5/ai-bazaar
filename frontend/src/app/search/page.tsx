@@ -2,52 +2,29 @@
 
 import { useState, useEffect } from "react";
 import ProductRow from "@/components/ProductRow";
-import { Search as SearchIcon } from "lucide-react";
-
-// Mock data based on your CSV
-const mockProducts = [
-  {
-    id: "prod-1",
-    name: "Avtobenzin A-80",
-    category: "Yoqilg'i",
-    unit: "litr",
-    currentPrice: 9354321,
-    changePercent: 0.7,
-    historicalPrices: [9200000, 9250000, 9300000, 9354321, 9354321, 9300000, 9354321],
-  },
-  {
-    id: "prod-2",
-    name: "Avtobenzin A-91 K2-L",
-    category: "Yoqilg'i",
-    unit: "litr",
-    currentPrice: 12306172,
-    changePercent: -2.0,
-    historicalPrices: [12600000, 12550000, 12500000, 12400000, 12350000, 12300000, 12306172],
-  },
-  {
-    id: "prod-3",
-    name: "Portlandsement PS M-500",
-    category: "Qurilish materiallari",
-    unit: "tonna",
-    currentPrice: 997067,
-    changePercent: 0.0,
-    historicalPrices: [997067, 997067, 997067, 997067, 997067, 997067, 997067],
-  },
-  {
-    id: "prod-4",
-    name: "Ugolok stalnoy 50x50x4mm",
-    category: "Metall prokat",
-    unit: "metr",
-    currentPrice: 9691161,
-    changePercent: 5.2,
-    historicalPrices: [9000000, 9100000, 9300000, 9500000, 9600000, 9650000, 9691161],
-  },
-];
+import { Search as SearchIcon, Loader2 } from "lucide-react";
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
+  
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch live products from CSV via our API
+  useEffect(() => {
+    fetch("/api/products")
+      .then((res) => res.json())
+      .then((data) => {
+        setProducts(data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load products:", err);
+        setIsLoading(false);
+      });
+  }, []);
 
   useEffect(() => {
     const saved = localStorage.getItem("pinnedProducts");
@@ -62,7 +39,7 @@ export default function SearchPage() {
 
   const handlePinToggle = (id: string) => {
     const isCurrentlyPinned = pinnedIds.includes(id);
-    const product = mockProducts.find(p => p.id === id);
+    const product = products.find(p => p.id === id);
     if (!product) return;
 
     let updatedProducts;
@@ -77,10 +54,12 @@ export default function SearchPage() {
     localStorage.setItem("pinnedProducts", JSON.stringify(updatedProducts));
   };
 
-  const filteredProducts = mockProducts.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.category.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredProducts = products
+    .filter(p => 
+      p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.category.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .slice(0, 50); // Show top 50 results to prevent massive DOM updates
 
   return (
     <div className="max-w-5xl mx-auto py-6">
@@ -110,19 +89,34 @@ export default function SearchPage() {
           <div className="w-32 shrink-0 text-center">Chart</div>
         </div>
         
-        {filteredProducts.map((product) => (
-          <ProductRow 
-            key={product.id}
-            {...product}
-            isPinned={pinnedIds.includes(product.id)}
-            onPinToggle={handlePinToggle}
-          />
-        ))}
-
-        {filteredProducts.length === 0 && (
-          <div className="text-center py-12 text-gray-500">
-            No products found matching "{searchTerm}"
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+            <p>Loading real market data...</p>
           </div>
+        ) : (
+          <>
+            {filteredProducts.map((product) => (
+              <ProductRow 
+                key={product.id}
+                {...product}
+                isPinned={pinnedIds.includes(product.id)}
+                onPinToggle={handlePinToggle}
+              />
+            ))}
+
+            {filteredProducts.length === 0 && (
+              <div className="text-center py-12 text-gray-500">
+                No products found matching "{searchTerm}"
+              </div>
+            )}
+            
+            {filteredProducts.length === 50 && (
+              <div className="text-center py-4 text-sm text-gray-400">
+                Showing top 50 results. Please narrow your search.
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
