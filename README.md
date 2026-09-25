@@ -1,19 +1,62 @@
-# AI Bazaar
+# UZEX Analytics & AI Forecasting Platform
 
-Shared project workspace for the AI Bazaar team.
+This project automates the extraction, cleaning, and AI-driven forecasting of product prices from UZEX (Uzbekistan Commodity Exchange) weekly bulletins.
 
-The product scope and application stack are still to be decided. This repository starts with collaboration documentation only; there is no application to run or test yet.
+## Directory Structure
 
-## Start here
+The project has been organized into clear, logical components:
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) to set up your laptop, create a branch, push changes, and open a pull request.
+```text
+C:\Users\Abrorjon\Documents\Data\
+│
+├── data/
+│   ├── raw_pdfs/           # Original PDF weekly bulletins downloaded from UZEX
+│   ├── all_data.csv        # Raw extracted tabular data (Cyrillic)
+│   └── cleaned_data_uz.csv # Fully cleaned, localized (Uzbek), and formatted data
+│
+├── scripts/
+│   ├── 01_download_archive.py # Automated scraper to download historical PDFs from UZEX archive
+│   ├── 02_pdf_pipeline.py     # OCR/PDF extraction pipeline that builds all_data.csv
+│   ├── 03_clean_data.py       # Linguistic normalization (abbreviations, Cyrillic->Latin) to cleaned_data_uz.csv
+│   └── test_pdf.py            # Utility script for testing PDF table boundaries
+│
+├── dashboard/
+│   └── app.py              # Streamlit Web Dashboard & Hugging Face Zero-Shot Forecaster
+│
+└── README.md
+```
 
-## Team workflow
+## How to use the Pipeline
 
-- Keep `main` ready for everyone to pull.
-- Use a separate branch for each change.
-- Open a pull request and ask a teammate to review before merging.
-- Pull the latest `main` before starting the next change.
-- Agree on the first feature and technology stack before adding application scaffolding.
+If you ever need to update the data with a new week's PDF, you can run the pipeline sequentially from the project root:
 
-These are team conventions; GitHub enforcement has not been configured.
+1. **Download new data:** (or manually place the PDF in `data/raw_pdfs/`)
+   ```powershell
+   python scripts/01_download_archive.py
+   ```
+2. **Extract Tables to CSV:**
+   ```powershell
+   python scripts/02_pdf_pipeline.py
+   ```
+3. **Clean and Localize Text:**
+   ```powershell
+   python scripts/03_clean_data.py
+   ```
+
+## Web Dashboard & AI Forecaster
+
+The platform features an interactive web dashboard built with Streamlit and Plotly. It uses **Amazon Chronos** (`amazon/chronos-t5-mini`), a powerful zero-shot time-series forecasting model from Hugging Face.
+
+To run the dashboard:
+```powershell
+python -m streamlit run dashboard/app.py
+```
+
+### Batch Forecasting
+Because AI models are heavy, the dashboard includes an **Administrator Mode**. By clicking **"Yangi prognozlarni hisoblash"** in the sidebar, the script will:
+1. Load the AI model into memory.
+2. Loop through every single unique product in `data/cleaned_data_uz.csv`.
+3. Save the minimum, maximum, and average expected prices to a fast cache file (`data/forecasts.csv`).
+4. Skip products with insufficient history (less than 5 weeks of data).
+
+*(Note: If you have Streamlit running and need to move `forecasts.csv` manually into the `data/` folder, you may need to stop the server (Ctrl+C) first because Windows locks the file while the dashboard is displaying it!)*
