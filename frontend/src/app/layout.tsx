@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NaqtNazar",
+  title: "NarxNazar",
   description: "AI-Powered Market Intelligence, Pricing, and B2B Procurement Platform",
 };
 

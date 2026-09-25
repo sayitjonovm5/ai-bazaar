@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User } from "lucide-react";
+import Image from "next/image";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -18,10 +19,15 @@ export default function Sidebar() {
 
   return (
     <div className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-16 shrink-0 items-center px-6">
-        <span className="text-xl font-bold text-blue-900 tracking-tight">
-          NaqtNazar
-        </span>
+      <div className="flex h-20 shrink-0 items-center px-6 py-2">
+        <Image 
+          src="/logo.png" 
+          alt="NarxNazar Logo" 
+          width={180} 
+          height={60} 
+          className="object-contain w-auto h-full"
+          priority
+        />
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
         <nav className="flex-1 space-y-1">
