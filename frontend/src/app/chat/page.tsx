@@ -9,7 +9,7 @@ export default function ChatPage() {
     {
       id: 1,
       role: "assistant",
-      content: "Hello! I am your Bozor-Analitika market AI. You can ask me anything about current prices, market trends, or supplier comparisons.",
+      content: "Hello! I am your NaqtNazar market AI. You can ask me anything about current prices, market trends, or supplier comparisons.",
     },
   ]);
   const [input, setInput] = useState("");

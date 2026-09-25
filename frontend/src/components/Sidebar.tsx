@@ -20,7 +20,7 @@ export default function Sidebar() {
     <div className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
       <div className="flex h-16 shrink-0 items-center px-6">
         <span className="text-xl font-bold text-blue-900 tracking-tight">
-          Bozor-Analitika
+          NaqtNazar
         </span>
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
