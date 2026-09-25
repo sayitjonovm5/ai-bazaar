@@ -1,4 +1,7 @@
 import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
+import Papa from "papaparse";
 
 export async function POST(req: Request) {
   try {
@@ -18,6 +21,38 @@ export async function POST(req: Request) {
       );
     }
 
+    // --- Simple RAG Implementation ---
+    let contextData = "";
+    try {
+      const forecastPath = path.join(process.cwd(), "..", "data", "forecasts.csv");
+      if (fs.existsSync(forecastPath)) {
+        const fContent = fs.readFileSync(forecastPath, "utf8");
+        const { data: forecastData } = Papa.parse(fContent, { header: true, skipEmptyLines: true });
+        
+        // Very basic keyword matching
+        const words = message.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+        
+        const relevantForecasts = (forecastData as any[]).filter(row => 
+          words.some(word => row.Product_Name?.toLowerCase().includes(word) || row.Category?.toLowerCase().includes(word))
+        ).slice(0, 5); // Take top 5 matches to not overload the local LLM context
+
+        if (relevantForecasts.length > 0) {
+          contextData = "Here is some relevant market forecast data from our database:\n";
+          relevantForecasts.forEach(row => {
+            contextData += `- ${row.Product_Name} (${row.Category}): Forecasted Median Price is ${row.Median_Price} UZS (Min: ${row.Min_Price}, Max: ${row.Max_Price}) for ${row.Forecast_Date}.\n`;
+          });
+        }
+      }
+    } catch (e) {
+      console.error("Error reading RAG context:", e);
+    }
+
+    const systemPrompt = `You are the Bozor-Analitika AI Analyst. You help users understand B2B market prices in Uzbekistan. Be concise and helpful.`;
+    
+    const finalPrompt = contextData 
+      ? `${systemPrompt}\n\n${contextData}\nUser Question: ${message}\nAnswer:` 
+      : `${systemPrompt}\n\nUser Question: ${message}\nAnswer:`;
+
     const response = await fetch(OLLAMA_BASE_URL, {
       method: "POST",
       headers: {
@@ -25,7 +60,7 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({
         model: OLLAMA_MODEL,
-        prompt: message,
+        prompt: finalPrompt,
         stream: false,
       }),
     });
