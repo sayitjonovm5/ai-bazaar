@@ -27,7 +27,9 @@ export async function POST(req: Request) {
       const dataPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
       const forecastPath = path.join(process.cwd(), "..", "data", "forecasts.csv");
       
-      const words = message.toLowerCase().split(/[\s?.,]+/).filter((w: string) => w.length > 3);
+      const stopWords = ["salom", "assalom", "assalomu", "alaykum", "narxi", "qancha", "aytib", "bering", "iltimos", "qanday", "nima", "haqida", "bilan", "uchun", "kuningiz", "yaxshimi"];
+      const words = message.toLowerCase().split(/[\s?.,]+/)
+        .filter((w: string) => w.length > 3 && !stopWords.includes(w));
       
       if (words.length > 0 && fs.existsSync(dataPath)) {
         // 1. Read Current Market Data
@@ -110,7 +112,11 @@ export async function POST(req: Request) {
 
     const data = await response.json();
     
-    return NextResponse.json({ reply: data.response });
+    // Clean up APST token artifacts from the custom Uzbek model
+    let reply = data.response || "";
+    reply = reply.replace(/APST/g, "'");
+    
+    return NextResponse.json({ reply });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(
