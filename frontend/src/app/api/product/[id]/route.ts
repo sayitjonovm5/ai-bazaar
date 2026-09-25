@@ -27,7 +27,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       .filter((row: any) => row.Product_Name === productId)
       .map((row: any) => ({
         date: new Date(row.Date).toISOString().split('T')[0],
-        price: parseFloat(row.Current_Price_Sum)
+        price: parseFloat(String(row.Current_Price_Sum).replace(/[\s,]/g, ''))
       }))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 

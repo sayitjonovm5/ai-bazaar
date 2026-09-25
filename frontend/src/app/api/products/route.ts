@@ -21,7 +21,8 @@ export async function GET() {
     data.forEach((row: any) => {
       if (!row.Product_Name || !row.Current_Price_Sum) return;
       
-      const price = parseFloat(row.Current_Price_Sum);
+      const priceStr = String(row.Current_Price_Sum).replace(/[\s,]/g, '');
+      const price = parseFloat(priceStr);
       
       if (!productMap.has(row.Product_Name)) {
         productMap.set(row.Product_Name, {
