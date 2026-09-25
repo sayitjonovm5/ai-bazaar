@@ -79,7 +79,7 @@ export default function Dashboard() {
               100% { transform: translateX(-100%); }
             }
             .animate-ticker {
-              animation: ticker 120s linear infinite;
+              animation: ticker 400s linear infinite;
               display: inline-flex;
               white-space: nowrap;
               padding-left: 100%;
