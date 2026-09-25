@@ -3,8 +3,9 @@ import fs from "fs";
 import path from "path";
 import Papa from "papaparse";
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
+    const params = await props.params;
     const productId = decodeURIComponent(params.id);
     
     // Parse historical data

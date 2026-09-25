@@ -3,7 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const productName = decodeURIComponent(params.id);
   
   const suppliers = await prisma.supplierOffer.findMany({
@@ -14,10 +15,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json(suppliers);
 }
 
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, props: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const params = await props.params;
   const productName = decodeURIComponent(params.id);
   const body = await req.json();
 
