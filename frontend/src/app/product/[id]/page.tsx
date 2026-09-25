@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { LineChart, Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Plus, Building2, Phone, Loader2 } from "lucide-react";
+import { Plus, Building2, Phone, Loader2, ArrowLeft } from "lucide-react";
 import { useSession } from "next-auth/react";
+import ProductIcon from "@/components/ProductIcon";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
@@ -85,11 +87,25 @@ export default function ProductDetailsPage() {
     }
   };
 
+  const decodedName = typeof id === "string" ? decodeURIComponent(id) : "";
+
   return (
     <div className="max-w-7xl mx-auto py-6 h-full flex flex-col">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Product Details (Mock {id})</h1>
-        <p className="text-gray-500 mt-2">AI-powered forecast & supplier marketplace</p>
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        <div className="flex items-center space-x-4">
+          <ProductIcon name={decodedName} size="xl" showCategoryHint={true} />
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{decodedName}</h1>
+            <p className="text-gray-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
+          </div>
+        </div>
+        <Link 
+          href="/search" 
+          className="inline-flex items-center gap-2 self-start md:self-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-sm font-medium transition-colors border border-gray-200"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Barcha mahsulotlar
+        </Link>
       </div>
 
       <div className="flex flex-1 gap-8 h-full min-h-0">

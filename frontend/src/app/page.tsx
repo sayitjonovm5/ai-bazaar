@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Loader2, TrendingUp, Package, Calendar, MoreHorizontal } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import ProductIcon from "@/components/ProductIcon";
 
 export default function Dashboard() {
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
@@ -213,18 +214,18 @@ export default function Dashboard() {
             {/* Left Column: Product Cards Grid */}
             <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6 items-start auto-rows-max">
               {pinnedProducts.map((p) => (
-                <div key={p.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div key={p.id} className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
-                        <Package className="w-5 h-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-gray-900 font-semibold truncate max-w-[200px]" title={p.name}>{p.name}</h3>
+                    <div className="flex items-center space-x-3 min-w-0">
+                      <ProductIcon name={p.name} category={p.category} size="md" />
+                      <div className="min-w-0">
+                        <Link href={`/product/${encodeURIComponent(p.id)}`} className="text-gray-900 font-semibold hover:text-blue-600 truncate block max-w-[190px]" title={p.name}>
+                          {p.name}
+                        </Link>
                         <p className="text-xs text-gray-400">{p.unit || 'birlik'}</p>
                       </div>
                     </div>
-                    <button onClick={() => handleUnpin(p.id)} className="text-gray-400 hover:text-red-500 transition-colors">
+                    <button onClick={() => handleUnpin(p.id)} className="text-gray-400 hover:text-red-500 transition-colors" title="O'chirish">
                       <MoreHorizontal className="w-5 h-5" />
                     </button>
                   </div>

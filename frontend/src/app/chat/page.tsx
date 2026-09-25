@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Bot, User } from "lucide-react";
+import { Send, Bot, User, Sparkles } from "lucide-react";
+import ProductIcon from "@/components/ProductIcon";
 
 export default function ChatPage() {
   const [messages, setMessages] = useState([
@@ -79,6 +80,54 @@ export default function ChatPage() {
               </div>
             </div>
           ))}
+
+          {messages.length <= 1 && (
+            <div className="my-6 pt-4 border-t border-gray-100">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                Ommabop savollar va tovarlar
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {[
+                  {
+                    name: "Avtobenzin A-92",
+                    query: "Avtobenzin A-92 narxi va prognozi qanday?",
+                    category: "Yoqilg'i",
+                  },
+                  {
+                    name: "Sement PTs 400-D20",
+                    query: "Sement PTs 400 narxi va kelgusi haftalik prognozi",
+                    category: "Qurilish materiallari",
+                  },
+                  {
+                    name: "Armatura diametri 12 mm",
+                    query: "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
+                    category: "Metallurgiya",
+                  },
+                  {
+                    name: "Bug'doy",
+                    query: "Bug'doy va un mahsulotlari narxi qanday?",
+                    category: "Qishloq xo'jaligi va oziq-ovqat",
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.query}
+                    onClick={() => {
+                      setInput(item.query);
+                    }}
+                    className="flex items-center gap-3 p-3 text-left rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-xs text-gray-700 hover:text-blue-900 group"
+                  >
+                    <ProductIcon name={item.name} category={item.category} size="sm" />
+                    <div className="min-w-0">
+                      <div className="font-semibold text-gray-900 group-hover:text-blue-600 truncate">{item.name}</div>
+                      <div className="text-gray-500 truncate mt-0.5">{item.query}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {isLoading && (
             <div className="flex gap-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600">

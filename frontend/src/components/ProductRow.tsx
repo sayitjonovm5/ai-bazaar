@@ -3,10 +3,12 @@
 import { LineChart, Line, ResponsiveContainer, YAxis } from "recharts";
 import { ArrowUp, ArrowDown, Pin } from "lucide-react";
 import Link from "next/link";
+import ProductIcon from "./ProductIcon";
 
 interface ProductRowProps {
   id: string;
   name: string;
+  category?: string;
   unit: string;
   currentPrice: number;
   changePercent: number;
@@ -18,6 +20,7 @@ interface ProductRowProps {
 export default function ProductRow({
   id,
   name,
+  category,
   unit,
   currentPrice,
   changePercent,
@@ -47,8 +50,11 @@ export default function ProductRow({
             <Pin className="h-4 w-4" />
           </button>
         )}
-        <Link href={`/product/${id}`} className="truncate font-medium text-gray-900 hover:text-blue-600">
-          {name}
+        <Link href={`/product/${id}`} className="flex items-center min-w-0 group/link hover:text-blue-600">
+          <ProductIcon name={name} category={category} size="sm" className="mr-3" />
+          <span className="truncate font-medium text-gray-900 group-hover/link:text-blue-600">
+            {name}
+          </span>
         </Link>
       </div>
 
