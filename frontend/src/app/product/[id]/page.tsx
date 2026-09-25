@@ -5,29 +5,32 @@ import { useParams } from "next/navigation";
 import { LineChart, Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Plus, Building2, Phone } from "lucide-react";
 
-// Mock data matching the Python Streamlit logic:
-// Historical data for past periods, plus one 'next week' forecast point with min, median, max.
-const chartData = [
-  { date: "2024-07-05", historical: 9100000 },
-  { date: "2024-07-12", historical: 9150000 },
-  { date: "2024-07-19", historical: 9120000 },
-  { date: "2024-07-26", historical: 9200000 },
-  { date: "2024-08-02", historical: 9250000 },
-  { date: "2024-08-09", historical: 9280000 },
-  { date: "2024-08-16", historical: 9270000 },
-  { date: "2024-08-23", historical: 9300000 },
-  { date: "2024-08-30", historical: 9350000 },
-  { date: "2024-09-06", historical: 9354321, forecastMedian: 9354321, forecastRange: [9354321, 9354321] }, // Connects history to forecast
-  { date: "2024-09-13", forecastMedian: 9450000, forecastRange: [9300000, 9600000] }, // Next week's forecast (Min-Max range)
-];
-
 export default function ProductDetailsPage() {
   const { id } = useParams();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [suppliers, setSuppliers] = useState<any[]>([
-    // Initially empty per requirements, but let's allow them to add
-  ]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
   const [newSupplier, setNewSupplier] = useState({ name: "", price: "", description: "", contact: "" });
+  
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch product forecast & history
+  useEffect(() => {
+    if (!id) return;
+    
+    fetch(`/api/product/${id}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.chartData) {
+          setChartData(data.chartData);
+        }
+        setIsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  }, [id]);
 
   const handleAddSupplier = (e: React.FormEvent) => {
     e.preventDefault();
