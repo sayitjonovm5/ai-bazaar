@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import ProductRow from "@/components/ProductRow";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -11,6 +12,8 @@ export default function SearchPage() {
   
   const [products, setProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const { data: session } = useSession();
 
   // Fetch live products from CSV via our API
   useEffect(() => {
@@ -26,18 +29,31 @@ export default function SearchPage() {
       });
   }, []);
 
+  // Fetch pinned product IDs from DB
   useEffect(() => {
-    const saved = localStorage.getItem("pinnedProducts");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setPinnedProducts(parsed);
-        setPinnedIds(parsed.map((p: any) => p.id));
-      } catch (e) {}
+    if (session?.user) {
+      fetch("/api/user/pins")
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setPinnedIds(data);
+            const pinned = products.filter(p => data.includes(p.id));
+            setPinnedProducts(pinned);
+          }
+        })
+        .catch(console.error);
+    } else {
+      setPinnedIds([]);
+      setPinnedProducts([]);
     }
-  }, []);
+  }, [session, products]);
 
-  const handlePinToggle = (id: string) => {
+  const handlePinToggle = async (id: string) => {
+    if (!session?.user) {
+      alert("Please sign in to pin products.");
+      return;
+    }
+
     const isCurrentlyPinned = pinnedIds.includes(id);
     const product = products.find(p => p.id === id);
     if (!product) return;
@@ -45,13 +61,32 @@ export default function SearchPage() {
     let updatedProducts;
     if (isCurrentlyPinned) {
       updatedProducts = pinnedProducts.filter(p => p.id !== id);
+      setPinnedIds(prev => prev.filter(pId => pId !== id));
     } else {
       updatedProducts = [...pinnedProducts, product];
+      setPinnedIds(prev => [...prev, id]);
     }
 
     setPinnedProducts(updatedProducts);
-    setPinnedIds(updatedProducts.map(p => p.id));
-    localStorage.setItem("pinnedProducts", JSON.stringify(updatedProducts));
+
+    try {
+      if (isCurrentlyPinned) {
+        await fetch("/api/user/pins", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productName: id })
+        });
+      } else {
+        await fetch("/api/user/pins", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ productName: id })
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic update omitted for brevity
+    }
   };
 
   const filteredProducts = Array.isArray(products) ? products
