@@ -21,25 +21,56 @@ export async function POST(req: Request) {
       );
     }
 
-    // --- Simple RAG Implementation ---
+    // --- Upgraded RAG Implementation (Both Historical & Forecast Data) ---
     let contextData = "";
     try {
+      const dataPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
       const forecastPath = path.join(process.cwd(), "..", "data", "forecasts.csv");
-      if (fs.existsSync(forecastPath)) {
-        const fContent = fs.readFileSync(forecastPath, "utf8");
-        const { data: forecastData } = Papa.parse(fContent, { header: true, skipEmptyLines: true });
+      
+      const words = message.toLowerCase().split(/[\s?.,]+/).filter((w: string) => w.length > 3);
+      
+      if (words.length > 0 && fs.existsSync(dataPath)) {
+        // 1. Read Current Market Data
+        const dContent = fs.readFileSync(dataPath, "utf8");
+        const { data: rawData } = Papa.parse(dContent, { header: true, skipEmptyLines: true });
         
-        // Very basic keyword matching
-        const words = message.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+        // Find most recent price for matching products
+        const matches = new Map();
         
-        const relevantForecasts = (forecastData as any[]).filter(row => 
-          words.some(word => row.Product_Name?.toLowerCase().includes(word) || row.Category?.toLowerCase().includes(word))
-        ).slice(0, 5); // Take top 5 matches to not overload the local LLM context
+        (rawData as any[]).forEach(row => {
+          if (!row.Product_Name) return;
+          const name = row.Product_Name.toLowerCase();
+          const cat = (row.Category || "").toLowerCase();
+          
+          if (words.some(word => name.includes(word) || cat.includes(word))) {
+            // Keep overwriting so we get the latest row (assuming chronological)
+            matches.set(row.Product_Name, row);
+          }
+        });
 
-        if (relevantForecasts.length > 0) {
-          contextData = "Here is some relevant market forecast data from our database:\n";
-          relevantForecasts.forEach(row => {
-            contextData += `- ${row.Product_Name} (${row.Category}): Forecasted Median Price is ${row.Median_Price} UZS (Min: ${row.Min_Price}, Max: ${row.Max_Price}) for ${row.Forecast_Date}.\n`;
+        const topMatches = Array.from(matches.values()).slice(0, 10); // Top 10 products
+        
+        if (topMatches.length > 0) {
+          contextData = "Here is the most relevant market data from our database based on the user's query:\n\n";
+          
+          // 2. Try to attach Forecast Data if it exists
+          let forecastData: any[] = [];
+          if (fs.existsSync(forecastPath)) {
+            const fContent = fs.readFileSync(forecastPath, "utf8");
+            forecastData = Papa.parse(fContent, { header: true, skipEmptyLines: true }).data as any[];
+          }
+
+          topMatches.forEach(row => {
+            const price = row.Current_Price_Sum;
+            const change = row.Price_Change_Percent || "0";
+            contextData += `- Product: ${row.Product_Name} (Category: ${row.Category})\n`;
+            contextData += `  Current Price: ${price} UZS (Changed by ${change}% recently).\n`;
+            
+            const forecast = forecastData.find(f => f.Product_Name === row.Product_Name);
+            if (forecast) {
+              contextData += `  AI Forecast (${forecast.Forecast_Date}): Expected Median Price ${forecast.Median_Price} UZS (Range: ${forecast.Min_Price} - ${forecast.Max_Price}).\n`;
+            }
+            contextData += "\n";
           });
         }
       }
