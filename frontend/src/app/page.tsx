@@ -3,28 +3,62 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ProductRow from "@/components/ProductRow";
+import { useSession } from "next-auth/react";
+import { Loader2 } from "lucide-react";
 
 export default function Dashboard() {
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { data: session } = useSession();
 
   useEffect(() => {
-    const saved = localStorage.getItem("pinnedProducts");
-    if (saved) {
-      try {
-        setPinnedProducts(JSON.parse(saved));
-      } catch (e) {}
+    if (!session?.user) {
+      setPinnedProducts([]);
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
-  }, []);
 
-  const handleUnpin = (id: string) => {
-    const updated = pinnedProducts.filter(p => p.id !== id);
-    setPinnedProducts(updated);
-    localStorage.setItem("pinnedProducts", JSON.stringify(updated));
+    Promise.all([
+      fetch("/api/products").then(res => res.json()),
+      fetch("/api/user/pins").then(res => res.json())
+    ])
+    .then(([allProducts, pinnedIds]) => {
+      if (Array.isArray(allProducts) && Array.isArray(pinnedIds)) {
+        const pinned = allProducts.filter(p => pinnedIds.includes(p.id));
+        setPinnedProducts(pinned);
+      }
+      setIsLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      setIsLoading(false);
+    });
+  }, [session]);
+
+  const handleUnpin = async (id: string) => {
+    if (!session?.user) return;
+    
+    // Optimistic UI update
+    setPinnedProducts(prev => prev.filter(p => p.id !== id));
+
+    try {
+      await fetch("/api/user/pins", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName: id })
+      });
+    } catch (err) {
+      console.error(err);
+    }
   };
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-5xl mx-auto py-6">
