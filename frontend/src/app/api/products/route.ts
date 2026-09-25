@@ -23,6 +23,7 @@ export async function GET() {
       
       const priceStr = String(row.Current_Price_Sum).replace(/[\s,]/g, '');
       const price = parseFloat(priceStr);
+      if (isNaN(price)) return;
       
       if (!productMap.has(row.Product_Name)) {
         productMap.set(row.Product_Name, {

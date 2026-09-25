@@ -23,12 +23,24 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     }
 
     // Filter historical data for this product
-    let productHistory = histData
+    const rawData = histData
       .filter((row: any) => row.Product_Name === productId)
       .map((row: any) => ({
+        Date: row.Date,
+        Category: row.Category,
+        Current_Price: String(row.Current_Price_Sum).replace(/[\s,]/g, ''),
+        Trend: row.Price_Change_Direction,
+        Price_Change: String(row.Price_Change_Sum).replace(/[\s,]/g, ''),
+        Price_Change_Percent: row.Price_Change_Percent,
+        Period: row.Last_Trading_Week
+      }));
+    
+    let productHistory = rawData
+      .map((row: any) => ({
         date: new Date(row.Date).toISOString().split('T')[0],
-        price: parseFloat(String(row.Current_Price_Sum).replace(/[\s,]/g, ''))
+        price: parseFloat(row.Current_Price) 
       }))
+      .filter((h: any) => !isNaN(h.price))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     // Filter to last 20 periods for clean visualization
@@ -63,7 +75,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     return NextResponse.json({
       id: productId,
       name: productId,
-      chartData
+      chartData,
+      rawData
     });
   } catch (error) {
     console.error("Error loading product detail data:", error);

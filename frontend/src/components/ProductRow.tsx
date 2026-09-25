@@ -45,7 +45,7 @@ export default function ProductRow({
             className={`mr-3 p-1.5 rounded-full transition-colors ${
               isPinned ? "bg-blue-100 text-blue-600" : "text-gray-300 hover:text-gray-500 hover:bg-gray-100"
             }`}
-            title={isPinned ? "Unpin from Dashboard" : "Pin to Dashboard"}
+            title={isPinned ? "Asosiy paneldan olib tashlash" : "Asosiy panelga qistirish"}
           >
             <Pin className="h-4 w-4" />
           </button>
@@ -63,7 +63,7 @@ export default function ProductRow({
       </div>
 
       <div className="w-32 shrink-0 font-medium text-gray-900 text-right pr-4">
-        {currentPrice.toLocaleString("uz-UZ")} UZS
+        {currentPrice != null ? currentPrice.toLocaleString("uz-UZ") : "0"} UZS
       </div>
 
       <div className="w-24 shrink-0 flex justify-end pr-4">

@@ -62,7 +62,7 @@ export default function SearchPage() {
 
   const handlePinToggle = async (id: string) => {
     if (!session?.user) {
-      alert("Please sign in to pin products.");
+      alert("Mahsulotlarni qistirish uchun tizimga kiring.");
       return;
     }
 
@@ -154,17 +154,17 @@ export default function SearchPage() {
 
       <div className="space-y-1">
         <div className="flex items-center justify-between px-4 pb-2 text-sm font-medium text-gray-500">
-          <div className="flex-1">Product Name</div>
-          <div className="w-24 shrink-0">Unit</div>
-          <div className="w-32 shrink-0 text-right pr-4">Price (Current)</div>
-          <div className="w-24 shrink-0 flex justify-end pr-4">Change</div>
-          <div className="w-32 shrink-0 text-center">Chart</div>
+          <div className="flex-1">Mahsulot Nomi</div>
+          <div className="w-24 shrink-0">O'lchov</div>
+          <div className="w-32 shrink-0 text-right pr-4">Narx (Joriy)</div>
+          <div className="w-24 shrink-0 flex justify-end pr-4">O'zgarish</div>
+          <div className="w-32 shrink-0 text-center">Grafik</div>
         </div>
         
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 text-gray-500">
             <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-            <p>Loading real market data...</p>
+            <p>Bozor ma'lumotlari yuklanmoqda...</p>
           </div>
         ) : (
           <>
@@ -179,13 +179,13 @@ export default function SearchPage() {
 
             {filteredProducts.length === 0 && (
               <div className="text-center py-12 text-gray-500">
-                No products found matching "{searchTerm}"
+                "{searchTerm}" uchun mahsulot topilmadi
               </div>
             )}
             
             {filteredProducts.length === 50 && (
               <div className="text-center py-4 text-sm text-gray-400">
-                Showing top 50 results. Please narrow your search.
+                Eng yaxshi 50 ta natija. Iltimos, qidiruvingizni qisqartiring.
               </div>
             )}
           </>

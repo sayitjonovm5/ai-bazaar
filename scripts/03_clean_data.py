@@ -2,6 +2,7 @@ import csv
 import re
 import os
 import sys
+import json
 
 CYRILLIC_TO_LATIN = {
     'А': 'A', 'Б': 'B', 'В': 'V', 'Г': 'G', 'Д': 'D', 'Е': 'E', 'Ё': 'Yo', 'Ж': 'J',
@@ -24,9 +25,15 @@ def transliterate(text):
         result.append(CYRILLIC_TO_LATIN.get(char, char))
     return ''.join(result)
 
-def translate_to_uzbek(text):
+def translate_to_uzbek(text, translation_cache):
     if not text:
         return text
+        
+    # Use API translated cache first if available
+    if text in translation_cache:
+        # API might return same text if it failed to translate, 
+        # so we still apply regex replacements below
+        text = translation_cache[text]
     
     # Simple direct string replacements (case insensitive handling using regex)
     replacements = {
@@ -50,7 +57,7 @@ def translate_to_uzbek(text):
         r'без изм\.': '■',
         r'без изм': '■',
         r'bez izmeneniya': '■',
-        # Russian common raw materials translation
+        # Russian common raw materials translation fallback
         r'\bArmatura\b': 'Armatura',
         r'\bAvtobenzin\b': 'Avtobenzin',
         r'\bAzot\b': 'Azot',
@@ -81,11 +88,17 @@ def translate_to_uzbek(text):
     
     return text
 
-def clean_data(input_csv, output_csv):
+def clean_data(input_csv, output_csv, cache_file):
     print(f"Reading from {input_csv}...")
     if not os.path.exists(input_csv):
         print("Input file does not exist!")
         return
+        
+    translation_cache = {}
+    if os.path.exists(cache_file):
+        with open(cache_file, 'r', encoding='utf-8') as f:
+            translation_cache = json.load(f)
+        print(f"Loaded {len(translation_cache)} cached translations.")
         
     with open(input_csv, mode='r', encoding='utf-8') as infile:
         reader = csv.DictReader(infile)
@@ -97,7 +110,10 @@ def clean_data(input_csv, output_csv):
             
             count = 0
             for row in reader:
-                row['Product_Name'] = translate_to_uzbek(transliterate(row['Product_Name']))
+                # all_data.csv has latinized names, so we can just look them up
+                original_name = row['Product_Name']
+                translated_name = translate_to_uzbek(original_name, translation_cache)
+                row['Product_Name'] = translated_name
                 
                 # Update price change direction
                 direction = transliterate(row['Price_Change_Direction']).strip()
@@ -115,7 +131,9 @@ def clean_data(input_csv, output_csv):
     print(f"Processed {count} rows. Saved to {output_csv}.")
 
 if __name__ == '__main__':
-    base_dir = os.path.dirname(os.path.abspath(__file__))
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     input_csv = os.path.join(base_dir, 'data/all_data.csv')
     output_csv = os.path.join(base_dir, 'data/cleaned_data_uz.csv')
-    clean_data(input_csv, output_csv)
+    cache_file = os.path.join(base_dir, 'data/translations.json')
+    clean_data(input_csv, output_csv, cache_file)
+

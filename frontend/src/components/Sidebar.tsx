@@ -61,7 +61,7 @@ export default function Sidebar() {
         
         <div className="mt-auto border-t border-gray-100 pt-4">
           {status === "loading" ? (
-            <div className="px-2 py-2 text-sm text-gray-500">Loading auth...</div>
+            <div className="px-2 py-2 text-sm text-gray-500">Tizimga kirilmoqda...</div>
           ) : session ? (
             <>
               <div className="px-2 py-2 mb-2 flex items-center text-sm font-medium text-gray-900">
@@ -73,7 +73,7 @@ export default function Sidebar() {
                 className="group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
               >
                 <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-red-600" aria-hidden="true" />
-                Sign Out
+                Tizimdan chiqish
               </button>
             </>
           ) : (
@@ -82,7 +82,7 @@ export default function Sidebar() {
               className="group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
             >
               <LogIn className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-blue-600" aria-hidden="true" />
-              Sign In / Register
+              Tizimga kirish / Ro'yxatdan o'tish
             </button>
           )}
         </div>

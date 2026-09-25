@@ -329,7 +329,7 @@ export default function Dashboard() {
                       />
                       <Tooltip 
                         contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                        formatter={(value: number) => [`${value.toFixed(2)} pts`, 'Market Index']}
+                        formatter={(value: number) => [`${value.toFixed(2)} ball`, 'Bozor Indeksi']}
                       />
                       <Area type="monotone" dataKey="historicalIndex" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorIndexHist)" connectNulls />
                       <Area type="monotone" dataKey="forecastIndex" stroke="#22c55e" strokeWidth={2} strokeDasharray="4 4" fillOpacity={1} fill="url(#colorIndexFore)" connectNulls />

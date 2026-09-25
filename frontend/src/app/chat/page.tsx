@@ -9,7 +9,7 @@ export default function ChatPage() {
     {
       id: 1,
       role: "assistant",
-      content: "Hello! I am your NarxNazar market AI. You can ask me anything about current prices, market trends, or supplier comparisons.",
+      content: "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so'rashingiz mumkin.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -34,7 +34,7 @@ export default function ChatPage() {
       const data = await res.json();
       
       if (!res.ok) {
-        throw new Error(data.error || "Something went wrong communicating with the AI.");
+        throw new Error(data.error || "AI bilan bog'lanishda xatolik yuz berdi.");
       }
       
       setMessages(prev => [
@@ -63,8 +63,8 @@ export default function ChatPage() {
   return (
     <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)] flex flex-col py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">AI Market Analyst</h1>
-        <p className="text-gray-500 mt-1">Ask questions about data and forecasts</p>
+        <h1 className="text-3xl font-bold text-gray-900">AI Bozor Tahlilchisi</h1>
+        <p className="text-gray-500 mt-1">Ma'lumotlar va prognozlar haqida savollar bering</p>
       </div>
 
       <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
@@ -148,7 +148,7 @@ export default function ChatPage() {
             <input
               type="text"
               disabled={isLoading}
-              placeholder="Ask about price trends, e.g., 'Why did cement go up today?'"
+              placeholder="Narx tendensiyalari haqida so'rang, masalan: 'Sement narxi nega bugun oshdi?'"
               className="w-full pl-6 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm disabled:opacity-50"
               value={input}
               onChange={(e) => setInput(e.target.value)}
