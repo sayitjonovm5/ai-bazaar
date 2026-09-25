@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       console.error("Error reading RAG context:", e);
     }
 
-    const systemPrompt = `You are the Bozor-Analitika AI Analyst. You help users understand B2B market prices in Uzbekistan. Be concise and helpful.`;
+    const systemPrompt = `You are a strict data extraction AI. Answer the user's question directly using ONLY the provided market data. Do not use conversational filler. Do not say "I am ready" or "Here is the data". Just give the final answer immediately.`;
     
     const finalPrompt = contextData 
       ? `${systemPrompt}\n\n${contextData}\nUser Question: ${message}\nAnswer:` 
