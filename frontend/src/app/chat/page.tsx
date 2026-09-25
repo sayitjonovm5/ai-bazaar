@@ -1,0 +1,79 @@
+"use client";
+
+import { useState } from "react";
+import { Send, Bot, User } from "lucide-react";
+
+export default function ChatPage() {
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      role: "assistant",
+      content: "Hello! I am your Bozor-Analitika market AI. You can ask me anything about current prices, market trends, or supplier comparisons.",
+    },
+  ]);
+  const [input, setInput] = useState("");
+
+  const handleSend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    setMessages([...messages, { id: Date.now(), role: "user", content: input }]);
+    setInput("");
+    
+    // Simulate AI thinking (this will be replaced with real backend logic later)
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: "I am a prototype interface. My AI backend hasn't been connected yet, but soon I'll be able to analyze this data for you!",
+        },
+      ]);
+    }, 1000);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)] flex flex-col py-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">AI Market Analyst</h1>
+        <p className="text-gray-500 mt-1">Ask questions about data and forecasts</p>
+      </div>
+
+      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+        {/* Chat History */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}>
+                {msg.role === "user" ? <User size={20} /> : <Bot size={20} />}
+              </div>
+              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-900 rounded-tl-none"}`}>
+                {msg.content}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chat Input */}
+        <div className="p-4 bg-white border-t border-gray-100">
+          <form onSubmit={handleSend} className="relative flex items-center">
+            <input
+              type="text"
+              placeholder="Ask about price trends, e.g., 'Why did cement go up today?'"
+              className="w-full pl-6 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="absolute right-2 p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+            >
+              <Send size={20} />
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
