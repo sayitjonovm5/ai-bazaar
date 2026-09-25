@@ -22,6 +22,13 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
   const params = await props.params;
   const productName = decodeURIComponent(params.id);
   const body = await req.json();
+  
+  const userId = (session.user as any).id;
+  const userExists = await prisma.user.findUnique({ where: { id: userId } });
+  
+  if (!userExists) {
+    return NextResponse.json({ error: "Sizning hisobingiz topilmadi, iltimos tizimdan chiqib qayta kiring." }, { status: 401 });
+  }
 
   const offer = await prisma.supplierOffer.create({
     data: {

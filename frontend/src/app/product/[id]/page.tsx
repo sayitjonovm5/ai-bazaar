@@ -79,17 +79,20 @@ export default function ProductDetailsPage() {
         body: JSON.stringify(newSupplier)
       });
       
-      if (!res.ok) throw new Error("Failed to post offer");
+      const data = await res.json();
       
-      const newOffer = await res.json();
-      setSuppliers(prev => [...prev, newOffer]);
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to post offer");
+      }
+      
+      setSuppliers(prev => [...prev, data]);
       setNewSupplier({ name: "", price: "", description: "", contact: "", imageUrl: "" });
       setShowAddForm(false);
       setToastMessage("Taklifingiz muvaffaqiyatli qo'shildi va Marketplace bo'limiga yuborildi!");
       setTimeout(() => setToastMessage(""), 4000);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to submit offer.");
+      alert(err.message || "Failed to submit offer.");
     } finally {
       setIsSubmitting(false);
     }
