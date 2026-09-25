@@ -5,7 +5,8 @@ import Papa from "papaparse";
 
 export async function GET() {
   try {
-    const csvPath = path.join(process.cwd(), "data", "cleaned_data_uz.csv");
+    // The Next.js app is running inside "frontend/", but the data folder is in the root directory
+    const csvPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
     const fileContent = fs.readFileSync(csvPath, "utf8");
     
     // Parse the CSV

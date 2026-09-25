@@ -54,12 +54,12 @@ export default function SearchPage() {
     localStorage.setItem("pinnedProducts", JSON.stringify(updatedProducts));
   };
 
-  const filteredProducts = products
+  const filteredProducts = Array.isArray(products) ? products
     .filter(p => 
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
       p.category.toLowerCase().includes(searchTerm.toLowerCase())
     )
-    .slice(0, 50); // Show top 50 results to prevent massive DOM updates
+    .slice(0, 50) : []; // Show top 50 results to prevent massive DOM updates
 
   return (
     <div className="max-w-5xl mx-auto py-6">
