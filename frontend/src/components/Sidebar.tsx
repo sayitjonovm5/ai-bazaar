@@ -23,11 +23,14 @@ export default function Sidebar() {
         <Image 
           src="/logo.png" 
           alt="NarxNazar Logo" 
-          width={180} 
-          height={60} 
-          className="object-contain w-auto h-full"
+          width={40} 
+          height={40} 
+          className="object-contain w-auto h-10"
           priority
         />
+        <span className="text-2xl font-bold ml-2 tracking-tight" style={{ color: '#f36523' }}>
+          NarxNazar
+        </span>
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
         <nav className="flex-1 space-y-1">
