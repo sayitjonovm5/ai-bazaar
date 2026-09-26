@@ -12,6 +12,7 @@ model User {
   email     String   @unique
   name      String?
   password  String
+  profilePicture String?
   createdAt DateTime @default(now())
   
   // Relations
@@ -34,7 +35,11 @@ model SupplierOffer {
   productName String
   companyName String
   price       Float
-  contact     String
+  phoneNumber String @default("")
+  email       String?
+  whatsapp    String?
+  instagram   String?
+  telegram    String?
   description String?
   imageUrl    String?
   userId      String
