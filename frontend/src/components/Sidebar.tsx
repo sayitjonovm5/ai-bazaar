@@ -15,7 +15,7 @@ import {
 import Image from "next/image";
 const navigation = [
   { name: "Bosh sahifa", href: "/", icon: LayoutDashboard },
-  { name: "Marketplace", href: "/marketplace", icon: Store },
+  { name: "Savdo maydonchasi", href: "/marketplace", icon: Store },
   { name: "Mahsulotlar qidiruvi", href: "/search", icon: Search },
   { name: "AI tahlilchi", href: "/chat", icon: MessageSquare },
   { name: "Sozlamalar", href: "/settings", icon: Settings },

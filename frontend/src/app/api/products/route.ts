@@ -26,10 +26,22 @@ export async function GET() {
       if (isNaN(price)) return;
       
       if (!productMap.has(row.Product_Name)) {
-        productMap.set(row.Product_Name, {
-          id: row.Product_Name, // Using name as ID for simplicity
-          name: row.Product_Name,
-          category: row.Category || "Other",
+          let pName = row.Product_Name;
+          pName = pName.replace(/Avtobenzin/gi, "Benzin")
+                       .replace(/Ammiachnaya selitra/gi, "Ammiakli selitra")
+                       .replace(/Alyumin kompozitnaya panel/gi, "Alyuminiy kompozit panel")
+                       .replace(/Amiak vodniy/gi, "Suvli ammiak")
+                       .replace(/Azot gazoobrazniy/gi, "Gaz holatidagi azot")
+                       .replace(/Azot jidkiy/gi, "Suyuq azot")
+                       .replace(/Ammiak bezvodniy/gi, "Suvsiz ammiak")
+                       .replace(/Balka \(Dvutavr\)/gi, "Balka (I-nur)")
+                       .replace(/Krug g\.k/gi, "Doira g.k")
+                       .replace(/Truba stalnaya/gi, "Po'lat quvur");
+
+          productMap.set(row.Product_Name, {
+            id: row.Product_Name, // Using name as ID for simplicity
+            name: pName,
+            category: row.Category || "Boshqa",
           unit: "unit", // Can be extracted from name if needed
           currentPrice: price,
           changePercent: parseFloat(row.Price_Change_Percent) || 0,
