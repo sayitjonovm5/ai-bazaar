@@ -114,7 +114,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
                 </div>
               </div>
             </div>
-          </article>
+          </div>
         ))}
       </div>
       

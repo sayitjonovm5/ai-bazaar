@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import ProductRow from "@/components/ProductRow";
-import { Search as SearchIcon, Loader2, HelpCircle } from "lucide-react";
+import { Search as SearchIcon, Loader2, HelpCircle, X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ProductIcon from "@/components/ProductIcon";
 import { ErrorState } from "@/components/MarketFeedback";
@@ -109,9 +109,9 @@ export default function SearchPage() {
   const filteredProducts = Array.isArray(products) ? products
     .filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            p.category.toLowerCase().includes(searchTerm.toLowerCase());
+                            (p.category || "").toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-      const isContractAllowed = (p.contractType === 'Spot' && showSpot) || (p.contractType === 'Forvard' && showForvard);
+      const isContractAllowed = (!p.contractType) || (p.contractType === 'Spot' && showSpot) || (p.contractType === 'Forvard' && showForvard);
       return matchesSearch && matchesCategory && isContractAllowed;
     }) : [];
     
@@ -233,33 +233,18 @@ export default function SearchPage() {
                 onPinToggle={handlePinToggle}
               />
             ))}
-          </div>
-          <div className="mt-6 flex flex-col items-center gap-3">
-            <p className="text-xs text-gray-500">
-              {matches.length.toLocaleString("uz-UZ")} ta mahsulotdan{" "}
-              {visible.length} tasi ko‘rsatilmoqda
-            </p>
-            {visible.length < matches.length && (
-              <button
-                onClick={() => setVisibleCount((c) => c + 60)}
-                className="button-secondary"
-              >
-                Ko‘proq ko‘rsatish
-                <ChevronDown size={15} />
-              </button>
-            )}
-            
-            {filteredProducts.length > displayCount && (
-              <div className="flex justify-center mt-8 mb-4">
-                <button 
-                  onClick={() => setDisplayCount(prev => prev + 60)}
-                  className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
-                >
-                  Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
-                </button>
-              </div>
-            )}
           </>
+        )}
+
+        {filteredProducts.length > displayCount && (
+          <div className="flex justify-center mt-8 mb-4">
+            <button 
+              onClick={() => setDisplayCount(prev => prev + 60)}
+              className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
+            >
+              Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
+            </button>
+          </div>
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@ export interface Product {
   id: string;
   name: string;
   category?: string;
+  contractType?: string;
   unit: string;
   currentPrice: number;
   changePercent: number;

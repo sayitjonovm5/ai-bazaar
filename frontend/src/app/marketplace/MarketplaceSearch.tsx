@@ -7,6 +7,16 @@ function SearchInput() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [pending, startTransition] = useTransition();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (query.trim()) {
+      router.push(`/marketplace?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      router.push('/marketplace');
+    }
+  };
+
   return (
     <form onSubmit={handleSearch} className="relative w-full md:w-96 mt-6">
       <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4 pointer-events-none" />

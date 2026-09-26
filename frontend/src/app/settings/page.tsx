@@ -85,7 +85,7 @@ export default function SettingsPage() {
               <select
                 id="currency"
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
+                onChange={(e) => setCurrency(e.target.value as Currency)}
                 className="w-full max-w-xs px-3.5 py-2.5 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl text-sm text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 shadow-2xs"
               >
                 <option value="UZS">UZS (O‘zbek so‘mi)</option>

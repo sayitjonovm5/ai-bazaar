@@ -131,31 +131,21 @@ export default function ProductRow({
       </div>
 
       <div className="w-24 shrink-0 text-sm text-slate-500 font-medium">
-        {unit}
+        {formatUnit(unit)}
       </div>
 
       <div className="w-32 shrink-0 font-bold text-slate-900 text-right pr-4">
-        {currentPrice != null ? currentPrice.toLocaleString("uz-UZ") : "0"} UZS
+        {formatPrice(currentPrice)} <span className="text-xs font-normal text-gray-500">{currencyCode}</span>
       </div>
 
       <div className="w-24 shrink-0 flex justify-end pr-4">
-        {isPositive ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 border border-emerald-500/20 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-            <ArrowUp className="h-3 w-3" />
-            {changePercent}%
-          </span>
-        ) : isNegative ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 border border-rose-500/20 px-2.5 py-1 text-xs font-semibold text-rose-700">
-            <ArrowDown className="h-3 w-3" />
-            {Math.abs(changePercent)}%
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 rounded-full bg-slate-500/15 border border-slate-500/20 px-2.5 py-1 text-xs font-semibold text-slate-700">
-            {changePercent}%
-          </span>
-        )}
+        <PriceChange value={changePercent} />
       </div>
-    </article>
+
+      <div className="w-32 shrink-0 h-8">
+        {chart}
+      </div>
+    </div>
   );
 }
 
