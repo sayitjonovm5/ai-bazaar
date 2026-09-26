@@ -95,9 +95,14 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
         lastPoint.forecastMedian = lastPoint.historical;
         lastPoint.forecastRange = [lastPoint.historical, lastPoint.historical];
         
+        // Calculate next week from today
+        const nextWeek = new Date();
+        nextWeek.setDate(nextWeek.getDate() + 7);
+        const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
         // Add the forecast point
         chartData.push({
-          date: forecastRow.Forecast_Date.split(' ')[0], // handle potential datetime strings
+          date: nextWeekStr,
           forecastMedian: parseFloat(forecastRow.Median_Price),
           forecastRange: [parseFloat(forecastRow.Min_Price), parseFloat(forecastRow.Max_Price)]
         });
