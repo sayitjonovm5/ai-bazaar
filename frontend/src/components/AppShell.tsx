@@ -31,12 +31,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         }}
       />
 
-      {/* Floating Enterprise Console Chassis */}
-      <div className="relative z-10 w-full max-w-[1760px] mx-auto h-screen sm:h-[calc(100vh-1.5rem)] bg-[#F8FAFD] sm:rounded-[26px] border-0 sm:border sm:border-white/20 shadow-2xl shadow-blue-950/60 flex overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto bg-[#F8FAFD] p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+      {/* Frosted Glass Bezel (Glassmorphic Outer Chassis) matching BullBird reference */}
+      <div className="relative z-10 w-full max-w-[1780px] mx-auto p-0 sm:p-3 lg:p-4.5 rounded-none sm:rounded-[36px] bg-white/[0.08] backdrop-blur-2xl border-0 sm:border sm:border-white/25 shadow-[0_25px_80px_-15px_rgba(0,0,0,0.65),0_0_50px_rgba(37,99,235,0.15)] ring-0 sm:ring-1 sm:ring-white/10 flex items-center justify-center">
+        {/* Inner Console Chassis */}
+        <div className="w-full h-screen sm:h-[calc(100vh-3.5rem)] bg-[#F8FAFD] rounded-none sm:rounded-[24px] border-0 sm:border sm:border-slate-200/60 shadow-xl flex overflow-hidden">
+          <Sidebar />
+          <main className="flex-1 overflow-y-auto bg-[#F8FAFD] p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   );
