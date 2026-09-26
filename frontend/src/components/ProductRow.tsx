@@ -62,10 +62,10 @@ export default function ProductRow({
         isPinned ? "Asosiy paneldan olib tashlash" : "Asosiy panelga qistirish"
       }
       className={
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg " +
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors " +
         (isPinned
-          ? "bg-blue-50 text-blue-600"
-          : "text-gray-400 hover:bg-gray-100 hover:text-blue-600")
+          ? "bg-blue-600/15 text-blue-700 border border-blue-500/20"
+          : "text-slate-400 hover:bg-white/80 hover:text-slate-700")
       }
     >
       <Pin className="h-4 w-4" fill={isPinned ? "currentColor" : "none"} />
@@ -74,37 +74,44 @@ export default function ProductRow({
   if (view === "grid")
     return (
       <article
-        className="surface flex min-w-0 flex-col p-4 transition-shadow hover:shadow-md"
+        className="group flex min-w-0 flex-col justify-between p-5 bg-white/75 backdrop-blur-xl border border-white/60 shadow-2xs hover:shadow-md hover:bg-white/90 rounded-2xl transition-all"
         data-product-card
       >
-        <div className="mb-4 flex items-center justify-between">
-          <ProductIcon name={name} category={category} size="sm" />
-          {pin}
+        <div>
+          <div className="mb-3 flex items-center justify-between">
+            <ProductIcon name={name} category={category} size="sm" />
+            {pin}
+          </div>
+          <Link
+            href={"/product/" + encodeURIComponent(id)}
+            className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold text-slate-900 group-hover:text-blue-600 transition-colors"
+            title={name}
+          >
+            {name}
+          </Link>
+          <p className="mt-1 truncate text-xs text-slate-500" title={category}>
+            {category || "Boshqa mahsulotlar"}
+          </p>
         </div>
-        <Link
-          href={"/product/" + encodeURIComponent(id)}
-          className="line-clamp-2 min-h-10 text-[13px] font-semibold leading-5 hover:text-blue-600"
-          title={name}
-        >
-          {name}
-        </Link>
-        <p className="mt-1 truncate text-[11px] text-gray-500" title={category}>
-          {category || "Boshqa mahsulotlar"}
-        </p>
-        <div className="mt-5 flex flex-wrap items-baseline gap-x-1.5">
-          <span className="break-all text-xl font-semibold tracking-tight tabular-nums">
-            {formatPrice(currentPrice)}
-          </span>
-          <span className="text-[10px] font-medium text-gray-500">
-            {currencyCode} / {formatUnit(unit)}
-          </span>
-        </div>
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <PriceChange value={changePercent} />
-          <span className="text-[10px] text-gray-500">So‘nggi o‘zgarish</span>
-        </div>
-        <div className="mt-4 h-12 w-full" aria-label="Narx tarixi">
-          {chart}
+
+        <div className="mt-4 pt-3 border-t border-slate-100/80">
+          <div className="flex items-baseline justify-between gap-1">
+            <span className="text-lg font-bold text-slate-900 tracking-tight tabular-nums">
+              {formatPrice(currentPrice)} <span className="text-xs font-normal text-slate-500">{currencyCode}</span>
+            </span>
+            <span className="text-xs text-slate-500 font-medium">
+              / {formatUnit(unit)}
+            </span>
+          </div>
+
+          <div className="mt-2.5 flex items-center justify-between">
+            <PriceChange value={changePercent} />
+            <span className="text-[11px] text-slate-400">So'nggi o'zgarish</span>
+          </div>
+
+          <div className="mt-3 h-8 w-full" aria-label="Narx tarixi">
+            {chart}
+          </div>
         </div>
       </article>
     );

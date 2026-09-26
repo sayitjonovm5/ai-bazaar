@@ -1,7 +1,15 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import ProductRow from "@/components/ProductRow";
-import { Search as SearchIcon, Loader2, HelpCircle, X } from "lucide-react";
+import {
+  Search as SearchIcon,
+  Loader2,
+  HelpCircle,
+  X,
+  List,
+  LayoutGrid,
+  PackageSearch,
+} from "lucide-react";
 import { useSession } from "next-auth/react";
 import ProductIcon from "@/components/ProductIcon";
 import { ErrorState } from "@/components/MarketFeedback";
@@ -207,22 +215,125 @@ export default function SearchPage() {
         </label>
       </div>
 
-      <div className="space-y-1">
-        <div className="flex items-center justify-between px-4 pb-2 text-sm font-medium text-gray-500">
-          <div className="flex-1">Mahsulot Nomi</div>
-          <div className="w-24 shrink-0">O'lchov</div>
-          <div className="w-32 shrink-0 text-right pr-4">Narx (Joriy)</div>
-          <div className="w-24 shrink-0 flex justify-end pr-4">O'zgarish</div>
-          <div className="w-32 shrink-0 text-center">Grafik</div>
+      {/* View Switcher and Product Count */}
+      <div className="flex items-center justify-between gap-3 mb-5 px-1">
+        <p className="text-xs text-slate-500 font-medium">
+          {isLoading ? (
+            "Mahsulotlar yuklanmoqda..."
+          ) : (
+            <>
+              <span className="font-bold text-slate-900">
+                {filteredProducts.length.toLocaleString("uz-UZ")}
+              </span>{" "}
+              ta mahsulot topildi
+            </>
+          )}
+        </p>
+
+        <div className="flex items-center gap-1 p-1 bg-white/70 backdrop-blur-md border border-white/70 rounded-xl shadow-2xs">
+          <button
+            type="button"
+            onClick={() => changeView("list")}
+            aria-pressed={view === "list"}
+            title="Ro'yxat ko'rinishi"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              view === "list"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+            }`}
+          >
+            <List size={15} />
+            <span>Ro‘yxat</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => changeView("grid")}
+            aria-pressed={view === "grid"}
+            title="Kataklar (plitka) ko'rinishi"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+              view === "grid"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+            }`}
+          >
+            <LayoutGrid size={15} />
+            <span>Kataklar</span>
+          </button>
         </div>
-        
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-gray-500">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-            <p>Bozor ma'lumotlari yuklanmoqda...</p>
-          </div>
-        ) : (
-          <>
+      </div>
+
+      {error ? (
+        <ErrorState
+          message={error}
+          retry={() => {
+            setError("");
+            setIsLoading(true);
+            setAttempt((a) => a + 1);
+          }}
+        />
+      ) : isLoading ? (
+        <div
+          className={
+            view === "grid"
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              : "space-y-2"
+          }
+        >
+          {Array.from({ length: 8 }, (_, i) => (
+            <div
+              key={i}
+              className={
+                "animate-pulse bg-white/60 border border-white/70 rounded-2xl p-4 " +
+                (view === "grid" ? "h-64" : "h-16")
+              }
+            >
+              <div className="h-4 bg-slate-200 rounded w-2/3 mb-3"></div>
+              <div className="h-3 bg-slate-200 rounded w-1/3"></div>
+            </div>
+          ))}
+        </div>
+      ) : filteredProducts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center bg-white/50 backdrop-blur-md rounded-3xl border border-white/60">
+          <PackageSearch className="w-12 h-12 text-slate-400 mb-3" />
+          <h3 className="text-base font-bold text-slate-800">Mahsulot topilmadi</h3>
+          <p className="text-sm text-slate-500 mt-1 max-w-sm">
+            {searchTerm
+              ? `"${searchTerm}" bo'yicha hech qanday tovar topilmadi.`
+              : "Tanlangan filtrlar bo'yicha mahsulot topilmadi."}{" "}
+            Boshqa so'z kiriting yoki filtrlarni tozalang.
+          </p>
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setSelectedCategory("All");
+              setShowSpot(true);
+              setShowForvard(true);
+              setDisplayCount(60);
+            }}
+            className="mt-4 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 shadow-2xs transition-all cursor-pointer"
+          >
+            Filtrlarni tozalash
+          </button>
+        </div>
+      ) : (
+        <>
+          {view === "list" && (
+            <div className="flex items-center justify-between px-4 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <div className="flex-1">Mahsulot Nomi</div>
+              <div className="w-24 shrink-0">O'lchov</div>
+              <div className="w-32 shrink-0 text-right pr-4">Narx (Joriy)</div>
+              <div className="w-24 shrink-0 flex justify-end pr-4">O'zgarish</div>
+              <div className="w-32 shrink-0 text-center">Grafik</div>
+            </div>
+          )}
+
+          <div
+            className={
+              view === "grid"
+                ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+                : "space-y-2"
+            }
+          >
             {displayedProducts.map((product) => (
               <ProductRow 
                 key={product.id}
@@ -233,20 +344,20 @@ export default function SearchPage() {
                 onPinToggle={handlePinToggle}
               />
             ))}
-          </>
-        )}
-
-        {filteredProducts.length > displayCount && (
-          <div className="flex justify-center mt-8 mb-4">
-            <button 
-              onClick={() => setDisplayCount(prev => prev + 60)}
-              className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
-            >
-              Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
-            </button>
           </div>
-        )}
-      </div>
+
+          {filteredProducts.length > displayCount && (
+            <div className="flex justify-center mt-8 mb-4">
+              <button 
+                onClick={() => setDisplayCount(prev => prev + 60)}
+                className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all cursor-pointer"
+              >
+                Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
+              </button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 }
