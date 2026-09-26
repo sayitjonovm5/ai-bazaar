@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -17,11 +17,11 @@ import ProductIcon from "@/components/ProductIcon";
 import { ErrorState, LoadingState } from "@/components/MarketFeedback";
 import {
   readJson,
-  formatPrice,
   formatDate,
   chartForDisplay,
   type ChartPoint,
 } from "@/lib/market-ui";
+import { useCurrency } from "@/lib/currency-context";
 interface HistoryRow {
   Date: string;
   Category: string;
@@ -37,9 +37,33 @@ interface Detail {
 }
 export default function ProductDetailsPage() {
   const { id } = useParams<{ id: string }>();
+  const { formatPrice, convertPrice, currencyCode } = useCurrency();
   const [data, setData] = useState<Detail | null>(null);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
+
+  const displayChartData = useMemo(() => {
+    if (!data?.chartData) return [];
+    if (currencyCode !== "USD") return data.chartData;
+    return data.chartData.map((p) => ({
+      ...p,
+      historical:
+        p.historical !== undefined
+          ? convertPrice(p.historical) ?? undefined
+          : undefined,
+      forecastMedian:
+        p.forecastMedian !== undefined
+          ? convertPrice(p.forecastMedian) ?? undefined
+          : undefined,
+      forecastRange: p.forecastRange
+        ? ([
+            convertPrice(p.forecastRange[0]) ?? 0,
+            convertPrice(p.forecastRange[1]) ?? 0,
+          ] as [number, number])
+        : undefined,
+    }));
+  }, [data?.chartData, currencyCode, convertPrice]);
+
   useEffect(() => {
     const controller = new AbortController();
     readJson<Detail>("/api/product/" + encodeURIComponent(id), {
@@ -107,7 +131,7 @@ export default function ProductDetailsPage() {
                   Tarixiy narxlar va kelgusi hafta prognozi
                 </h2>
                 <p className="mt-1 text-xs text-gray-500">
-                  Narxlar O‘zbekiston so‘mida (UZS)
+                  Narxlar {currencyCode === "USD" ? "AQSh dollarida (USD)" : "O‘zbekiston so‘mida (UZS)"}
                 </p>
               </div>
               <div className="chart-legend">
@@ -130,7 +154,7 @@ export default function ProductDetailsPage() {
               <div className="h-72 min-w-0 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <ComposedChart
-                    data={data.chartData}
+                    data={displayChartData}
                     margin={{ top: 16, right: 8, left: 0, bottom: 8 }}
                   >
                     <CartesianGrid
@@ -168,9 +192,29 @@ export default function ProductDetailsPage() {
                       formatter={(value, key) => [
                         Array.isArray(value)
                           ? value
-                              .map((v) => formatPrice(Number(v)))
-                              .join(" – ") + " UZS"
-                          : formatPrice(Number(value)) + " UZS",
+                              .map((v) =>
+                                currencyCode === "USD"
+                                  ? Number(v).toLocaleString("en-US", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })
+                                  : Number(v).toLocaleString("uz-UZ", {
+                                      maximumFractionDigits: 2,
+                                    }),
+                              )
+                              .join(" – ") +
+                            " " +
+                            currencyCode
+                          : (currencyCode === "USD"
+                              ? Number(value).toLocaleString("en-US", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : Number(value).toLocaleString("uz-UZ", {
+                                  maximumFractionDigits: 2,
+                                })) +
+                            " " +
+                            currencyCode,
                         key === "historical"
                           ? "Tarixiy narx"
                           : key === "forecastRange"
@@ -236,9 +280,9 @@ export default function ProductDetailsPage() {
                     {[
                       "Sana",
                       "Kategoriya",
-                      "Joriy narx (UZS)",
+                      `Joriy narx (${currencyCode})`,
                       "Trend",
-                      "O‘zgarish (UZS)",
+                      `O‘zgarish (${currencyCode})`,
                       "O‘zgarish (%)",
                       "Davr",
                     ].map((label) => (
@@ -277,7 +321,13 @@ export default function ProductDetailsPage() {
                         {formatPrice(row.Price_Change)}
                       </td>
                       <td className="px-5 py-4">
-                        {formatPrice(row.Price_Change_Percent)}%
+                        {Number.isFinite(Number(row.Price_Change_Percent))
+                          ? Number(row.Price_Change_Percent).toLocaleString(
+                              "uz-UZ",
+                              { maximumFractionDigits: 2 },
+                            )
+                          : "—"}
+                        %
                       </td>
                       <td className="min-w-44 px-5 py-4 text-[11px]">
                         {row.Period}

@@ -17,13 +17,13 @@ import { PriceChange } from "@/components/ProductRow";
 import { ErrorState, LoadingState } from "@/components/MarketFeedback";
 import {
   readJson,
-  formatPrice,
   formatUnit,
   formatDate,
   chartForDisplay,
   type Product,
   type ChartPoint,
 } from "@/lib/market-ui";
+import { useCurrency } from "@/lib/currency-context";
 import toast from "react-hot-toast";
 
 type PinnedProduct = Product & { chartData: ChartPoint[] };
@@ -62,6 +62,7 @@ const tooltipStyle = {
   boxShadow: "0 8px 24px #18243b10",
 };
 export default function Dashboard() {
+  const { formatPrice, currencyCode } = useCurrency();
   const [products, setProducts] = useState<PinnedProduct[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState("");
@@ -256,7 +257,7 @@ export default function Dashboard() {
                       <p className="break-all text-2xl font-semibold tracking-tight tabular-nums">
                         {formatPrice(p.currentPrice)}{" "}
                         <span className="text-xs font-normal text-gray-500">
-                          UZS
+                          {currencyCode}
                         </span>
                       </p>
                       <PriceChange value={p.changePercent} />
@@ -297,7 +298,7 @@ export default function Dashboard() {
                             contentStyle={tooltipStyle}
                             labelFormatter={(label) => shortDate(String(label))}
                             formatter={(value) => [
-                              formatPrice(Number(value)) + " UZS",
+                              formatPrice(Number(value)) + " " + currencyCode,
                               "Narx",
                             ]}
                           />

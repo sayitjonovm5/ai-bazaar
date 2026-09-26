@@ -4,7 +4,8 @@ import ProductIcon from "@/components/ProductIcon";
 import { User, Phone, Calendar, Store, Plus, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import MarketplaceSearch from "./MarketplaceSearch";
-import { formatPrice, formatDate } from "@/lib/market-ui";
+import { formatDate } from "@/lib/market-ui";
+import ConvertedPrice from "@/components/ConvertedPrice";
 
 export default async function MarketplacePage({
   searchParams,
@@ -128,10 +129,9 @@ export default async function MarketplacePage({
               <h2 className="mb-1 break-words text-sm font-semibold">
                 {offer.companyName}
               </h2>
-              <p className="mb-4 break-words text-xl font-semibold tracking-tight tabular-nums">
-                {formatPrice(offer.price)}{" "}
-                <span className="text-xs font-normal text-gray-500">UZS</span>
-              </p>
+              <div className="mb-4 break-words text-xl font-semibold tracking-tight tabular-nums">
+                <ConvertedPrice price={offer.price} />
+              </div>
               <p className="mb-5 line-clamp-3 flex-1 text-xs text-gray-500">
                 {offer.description ||
                   "Qo‘shimcha ma’lumot uchun sotuvchi bilan bog‘laning."}

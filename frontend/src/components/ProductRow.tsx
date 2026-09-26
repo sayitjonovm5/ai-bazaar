@@ -2,7 +2,8 @@
 import { ArrowUpRight, ArrowDownRight, Minus, Pin } from "lucide-react";
 import Link from "next/link";
 import ProductIcon from "./ProductIcon";
-import { formatPrice, formatUnit, type Product } from "@/lib/market-ui";
+import { formatUnit, type Product } from "@/lib/market-ui";
+import { useCurrency } from "@/lib/currency-context";
 interface ProductRowProps extends Product {
   onPinToggle?: (id: string) => void;
   isPinned?: boolean;
@@ -44,6 +45,7 @@ export default function ProductRow({
   isPending = false,
   view = "list",
 }: ProductRowProps) {
+  const { formatPrice, currencyCode } = useCurrency();
   const chart = (
     <Sparkline prices={historicalPrices || []} change={changePercent} />
   );
@@ -94,7 +96,7 @@ export default function ProductRow({
             {formatPrice(currentPrice)}
           </span>
           <span className="text-[10px] font-medium text-gray-500">
-            UZS / {formatUnit(unit)}
+            {currencyCode} / {formatUnit(unit)}
           </span>
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
@@ -138,7 +140,7 @@ export default function ProductRow({
         <span className="block text-[13px] font-semibold tabular-nums">
           {formatPrice(currentPrice)}
         </span>
-        <span className="text-[10px] font-medium text-gray-500">UZS</span>
+        <span className="text-[10px] font-medium text-gray-500">{currencyCode}</span>
       </div>
       <div className="product-list-change text-right">
         <PriceChange value={changePercent} />
