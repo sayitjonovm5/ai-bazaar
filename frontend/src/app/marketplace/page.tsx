@@ -7,17 +7,23 @@ import MarketplaceSearch from "./MarketplaceSearch";
 export default async function MarketplacePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const resolvedSearchParams = await searchParams;
   const q = resolvedSearchParams?.q || "";
-  const offers = await prisma.supplierOffer.findMany({
-    where: q ? {
-      OR: [
-        { productName: { contains: q } },
-        { companyName: { contains: q } },
-        { description: { contains: q } }
-      ]
-    } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: { user: true }
-  });
+  let offers: any[] = [];
+  try {
+    offers = await prisma.supplierOffer.findMany({
+      where: q ? {
+        OR: [
+          { productName: { contains: q } },
+          { companyName: { contains: q } },
+          { description: { contains: q } }
+        ]
+      } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: { user: true }
+    });
+  } catch (error) {
+    console.error("Marketplace offers fetch error:", error);
+    offers = [];
+  }
 
   return (
     <div className="max-w-7xl mx-auto py-8">
@@ -36,6 +42,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
           <p className="text-slate-600 max-w-2xl text-lg">
             Barcha mahsulotlar uchun global ta'minotchilar takliflari bir joyda. Eng yaxshi narxlarni toping va ishonchli hamkorlar bilan bog'laning.
           </p>
+          <MarketplaceSearch />
         </div>
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
            <Store className="w-48 h-48 text-slate-900" />
@@ -89,10 +96,12 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               <p className="text-sm text-slate-600 mb-6 flex-1 line-clamp-3">{offer.description}</p>
               
               <div className="flex flex-col gap-3 mt-auto">
-                <a href={`tel:${offer.contact}`} className="flex items-center justify-center w-full py-2.5 bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white backdrop-blur-md border border-blue-600/20 rounded-xl font-medium text-sm gap-2 transition-all shadow-2xs">
-                  <Phone className="w-4 h-4" />
-                  {offer.contact}
-                </a>
+                {(offer.phoneNumber || offer.contact) ? (
+                  <a href={`tel:${offer.phoneNumber || offer.contact}`} className="flex items-center justify-center w-full py-2.5 bg-blue-600/10 text-blue-700 hover:bg-blue-600 hover:text-white backdrop-blur-md border border-blue-600/20 rounded-xl font-medium text-sm gap-2 transition-all shadow-2xs">
+                    <Phone className="w-4 h-4" />
+                    {offer.phoneNumber || offer.contact}
+                  </a>
+                ) : null}
                 <div className="flex items-center text-xs text-slate-400 justify-between">
                   <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(offer.createdAt).toLocaleDateString()}</span>
                 </div>
