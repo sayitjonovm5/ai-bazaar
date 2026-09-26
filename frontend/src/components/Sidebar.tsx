@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession, signIn, signOut } from "next-auth/react";
-import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User, Store } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
+import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, Store } from "lucide-react";
 import Image from "next/image";
+import { useAuthModal } from "@/components/AuthModal";
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -17,6 +18,15 @@ const navigation = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
+  const { openAuthModal } = useAuthModal();
+
+  const userRole = (session?.user as any)?.role;
+  const roleLabel =
+    userRole === "SUPPLIER"
+      ? "Yetkazib beruvchi"
+      : userRole === "ANALYST"
+      ? "Tahlilchi"
+      : "Xaridor / Tadbirkor";
 
   return (
     <div className="flex h-full w-64 sm:w-68 flex-col shrink-0 bg-gradient-to-b from-[#2563EB] via-[#1D4ED8] to-[#1E3A8A] text-white shadow-xl select-none">
@@ -80,14 +90,24 @@ export default function Sidebar() {
           ) : session ? (
             <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15">
               <div className="flex items-center text-xs font-semibold text-white mb-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center mr-2.5 shrink-0 text-amber-300 font-bold">
-                  {(session.user?.name || session.user?.email || "U")[0].toUpperCase()}
-                </div>
+                {session.user?.image ? (
+                  <img
+                    src={session.user.image}
+                    alt={session.user.name || "User"}
+                    className="w-8 h-8 rounded-full border border-white/30 object-cover mr-2.5 shrink-0"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center mr-2.5 shrink-0 text-amber-300 font-bold">
+                    {(session.user?.name || session.user?.email || "U")[0].toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-white font-medium text-xs leading-tight">
                     {session.user?.name || session.user?.email}
                   </p>
-                  <span className="text-[10px] text-blue-200 font-normal">Administrator</span>
+                  <span className="text-[10px] text-blue-200 font-normal">
+                    {roleLabel}
+                  </span>
                 </div>
               </div>
               <button 
@@ -100,7 +120,7 @@ export default function Sidebar() {
             </div>
           ) : (
             <button 
-              onClick={() => signIn("credentials")}
+              onClick={() => openAuthModal("signin")}
               className="group flex w-full items-center justify-center rounded-xl py-2.5 px-3 text-xs font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-xs"
             >
               <LogIn className="mr-2 h-4 w-4 text-blue-200 group-hover:text-white" aria-hidden="true" />
