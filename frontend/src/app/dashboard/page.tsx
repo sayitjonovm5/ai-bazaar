@@ -169,12 +169,12 @@ export default function Dashboard() {
             <input 
               type="text"
               placeholder="Mahsulotlarni qidirish..."
-              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white border border-slate-200 rounded-full shadow-2xs focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              className="w-full pl-9 pr-4 py-2 text-xs sm:text-sm bg-white/65 backdrop-blur-xl border border-white/70 rounded-full shadow-2xs focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
 
-          <div className="flex items-center bg-white p-1 rounded-full border border-slate-200 shadow-2xs">
+          <div className="flex items-center bg-white/50 backdrop-blur-md p-1 rounded-full border border-white/60 shadow-2xs">
             <button className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-900 text-white shadow-xs">
               Bugun
             </button>
@@ -188,7 +188,7 @@ export default function Dashboard() {
 
           <Link
             href="/search"
-            className="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-colors cursor-pointer"
+            className="inline-flex items-center px-4 py-2 rounded-full text-xs font-semibold bg-blue-600/90 hover:bg-blue-600 backdrop-blur-md text-white shadow-md hover:shadow-lg transition-all cursor-pointer"
           >
             + Tovar qo'shish
           </Link>
@@ -196,8 +196,8 @@ export default function Dashboard() {
       </div>
 
       {pinnedProducts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center p-12 sm:p-16 bg-white rounded-3xl border border-slate-200/80 shadow-xs text-center max-w-xl mx-auto my-12">
-          <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+        <div className="flex flex-col items-center justify-center p-12 sm:p-16 bg-white/75 backdrop-blur-2xl rounded-3xl border border-white/70 shadow-xs text-center max-w-xl mx-auto my-12">
+          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center mb-4">
             <Package className="w-8 h-8" />
           </div>
           <h3 className="text-xl font-bold text-slate-900 mb-2">Hech qanday mahsulot saqlanmagan</h3>
@@ -210,16 +210,16 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          {/* Top 4-Column Micro-Structured KPI Cards (BullBird Inspired) */}
+          {/* Top 4-Column Micro-Structured Translucent KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
             
             {/* KPI 1 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="bg-white/75 backdrop-blur-xl rounded-2xl p-5 border border-white/65 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md hover:bg-white/90 transition-all flex flex-col justify-between">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center">
                   <Package className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 rounded-full flex items-center">
+                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-500/15 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center">
                   +1 yangi
                 </span>
               </div>
@@ -237,12 +237,12 @@ export default function Dashboard() {
             </div>
 
             {/* KPI 2 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="bg-white/75 backdrop-blur-xl rounded-2xl p-5 border border-white/65 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md hover:bg-white/90 transition-all flex flex-col justify-between">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center justify-center">
                   <TrendingUp className="w-5 h-5" />
                 </div>
-                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center ${avgGrowth >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60'}`}>
+                <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center ${avgGrowth >= 0 ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 border border-rose-500/20'}`}>
                   {avgGrowth >= 0 ? "▲" : "▼"} {Math.abs(avgGrowth).toFixed(1)}%
                 </span>
               </div>
@@ -260,12 +260,12 @@ export default function Dashboard() {
             </div>
 
             {/* KPI 3 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="bg-white/75 backdrop-blur-xl rounded-2xl p-5 border border-white/65 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md hover:bg-white/90 transition-all flex flex-col justify-between">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center">
                   <Sparkles className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-200/60 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-indigo-700 bg-indigo-500/15 border border-indigo-500/20 px-2 py-0.5 rounded-full">
                   AI Active
                 </span>
               </div>
@@ -283,12 +283,12 @@ export default function Dashboard() {
             </div>
 
             {/* KPI 4 */}
-            <div className="bg-white rounded-2xl p-5 border border-slate-200/70 shadow-xs hover:shadow-md transition-all flex flex-col justify-between">
+            <div className="bg-white/75 backdrop-blur-xl rounded-2xl p-5 border border-white/65 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-md hover:bg-white/90 transition-all flex flex-col justify-between">
               <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center">
                   <Store className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-200/60 px-2 py-0.5 rounded-full">
+                <span className="text-[11px] font-bold text-amber-700 bg-amber-500/15 border border-amber-500/20 px-2 py-0.5 rounded-full">
                   UZEX Jonli
                 </span>
               </div>
@@ -315,7 +315,7 @@ export default function Dashboard() {
               {pinnedProducts.map((p, idx) => (
                 <div 
                   key={p.id} 
-                  className="group bg-white rounded-2xl p-5 border border-slate-200/80 shadow-xs hover:shadow-md hover:border-blue-300 transition-all duration-200 flex flex-col justify-between"
+                  className="group bg-white/75 backdrop-blur-xl rounded-2xl p-5 border border-white/65 shadow-xs hover:shadow-lg hover:border-blue-400/50 hover:bg-white/90 transition-all duration-200 flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex justify-between items-start mb-3">
@@ -334,21 +334,21 @@ export default function Dashboard() {
                       </div>
                       <button 
                         onClick={() => handleUnpin(p.id)} 
-                        className="text-slate-300 hover:text-rose-500 transition-colors p-1" 
+                        className="text-slate-300 hover:text-rose-500 transition-colors p-1 cursor-pointer" 
                         title="O'chirish"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
                     </div>
                     
-                    <div className="flex items-baseline justify-between mb-4 mt-2 pt-2 border-t border-slate-100">
+                    <div className="flex items-baseline justify-between mb-4 mt-2 pt-2 border-t border-slate-100/80">
                       <div>
                         <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
                           {p.currentPrice.toLocaleString()}
                         </span>
                         <span className="text-xs font-semibold text-slate-400 ml-1">UZS</span>
                       </div>
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.changePercent >= 0 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : 'bg-rose-50 text-rose-700 border border-rose-200/60'}`}>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.changePercent >= 0 ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 border border-rose-500/20'}`}>
                         {p.changePercent > 0 ? "+" : ""}{p.changePercent}%
                       </span>
                     </div>
@@ -372,7 +372,9 @@ export default function Dashboard() {
                           <Tooltip 
                             contentStyle={{ 
                               borderRadius: '10px', 
-                              border: '1px solid #e2e8f0', 
+                              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                              backdropFilter: 'blur(10px)',
+                              border: '1px solid rgba(226, 232, 240, 0.9)', 
                               boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                               fontSize: '12px',
                               fontWeight: '600'
@@ -387,7 +389,7 @@ export default function Dashboard() {
                   </div>
                   
                   {/* Card Footer Legend */}
-                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="mt-3 pt-3 border-t border-slate-100/80 flex items-center justify-between text-[11px] text-slate-500">
                     <div className="flex items-center space-x-3">
                       <span className="flex items-center font-medium">
                         <span className="w-2 h-2 rounded-full bg-blue-600 mr-1.5" />
@@ -411,13 +413,13 @@ export default function Dashboard() {
 
             {/* Right Column: Bozor Dinamikasi Index (4 Cols) */}
             <div className="lg:col-span-4">
-              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-xs sticky top-4">
-                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="bg-white/80 backdrop-blur-2xl rounded-3xl p-6 border border-white/70 shadow-sm sticky top-4">
+                <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100/80">
                   <div>
                     <h2 className="text-lg font-bold text-slate-900">Bozor Dinamikasi</h2>
                     <span className="text-xs text-slate-400">Kompozit narxlar indeksi</span>
                   </div>
-                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                  <span className="text-xs font-bold text-blue-600 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-full">
                     Jonli Indeks
                   </span>
                 </div>
@@ -453,7 +455,9 @@ export default function Dashboard() {
                       <Tooltip 
                         contentStyle={{ 
                           borderRadius: '10px', 
-                          border: '1px solid #e2e8f0', 
+                          backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(226, 232, 240, 0.9)', 
                           boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)',
                           fontSize: '12px',
                           fontWeight: '600'
@@ -466,7 +470,7 @@ export default function Dashboard() {
                   </ResponsiveContainer>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-slate-500 mb-6 pb-4 border-b border-slate-100">
+                <div className="flex items-center justify-between text-xs text-slate-500 mb-6 pb-4 border-b border-slate-100/80">
                   <span className="flex items-center font-medium">
                     <span className="w-2.5 h-2.5 rounded-full bg-blue-600 mr-1.5" />
                     Hozirgi Indeks
@@ -477,7 +481,7 @@ export default function Dashboard() {
                   </span>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/60 flex items-center space-x-3.5">
+                <div className="p-4 rounded-2xl bg-slate-900/5 backdrop-blur-md border border-slate-900/5 flex items-center space-x-3.5">
                   <div className="w-11 h-11 bg-blue-600 text-white rounded-xl flex items-center justify-center shrink-0 shadow-md">
                     <TrendingUp className="w-5 h-5" />
                   </div>

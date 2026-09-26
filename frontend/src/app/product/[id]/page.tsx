@@ -112,17 +112,17 @@ export default function ProductDetailsPage() {
           <p className="font-medium text-sm">{toastMessage}</p>
         </div>
       )}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/70 backdrop-blur-2xl p-6 rounded-2xl border border-white/60 shadow-xs">
         <div className="flex items-center space-x-4">
           <ProductIcon name={decodedName} size="xl" showCategoryHint={true} />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{decodedName}</h1>
-            <p className="text-gray-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
+            <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{decodedName}</h1>
+            <p className="text-slate-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
           </div>
         </div>
         <Link 
           href="/search" 
-          className="inline-flex items-center gap-2 self-start md:self-center px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-xl text-sm font-medium transition-colors border border-gray-200"
+          className="inline-flex items-center gap-2 self-start md:self-center px-4 py-2 bg-white/60 hover:bg-white/90 text-slate-700 rounded-xl text-sm font-semibold transition-all border border-white/70 backdrop-blur-md shadow-2xs"
         >
           <ArrowLeft className="w-4 h-4" />
           Barcha mahsulotlar
@@ -132,22 +132,28 @@ export default function ProductDetailsPage() {
       <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
         {/* Left Side: Product Forecast & Analysis & Table */}
         <div className="flex-1 overflow-y-auto pr-0 lg:pr-4 flex flex-col gap-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Tarixiy narxlar va kelgusi hafta prognozi</h2>
+          <div className="bg-white/75 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Tarixiy narxlar va kelgusi hafta prognozi</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f3f4f6" />
-                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#6b7280', fontSize: 12}} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(226, 232, 240, 0.6)" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{fill: '#64748b', fontSize: 12}} />
                   <YAxis 
                     axisLine={false} 
                     tickLine={false} 
-                    tick={{fill: '#6b7280', fontSize: 12}} 
+                    tick={{fill: '#64748b', fontSize: 12}} 
                     domain={[0, 'auto']}
                     tickFormatter={(value) => `${(value / 1000000).toFixed(1)}M`}
                   />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    contentStyle={{ 
+                      borderRadius: '16px', 
+                      background: 'rgba(255, 255, 255, 0.95)', 
+                      backdropFilter: 'blur(12px)', 
+                      border: '1px solid rgba(255, 255, 255, 0.8)', 
+                      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)' 
+                    }}
                     formatter={(value: any, name: any) => {
                       if (Array.isArray(value)) return [`${value[0].toLocaleString()} - ${value[1].toLocaleString()}`, 'Prognoz oraliq (Min-Max)'];
                       return [value.toLocaleString(), name === 'historical' ? 'Tarixiy narx' : 'O\'rtacha prognoz'];
@@ -156,7 +162,7 @@ export default function ProductDetailsPage() {
                   <Area 
                     type="monotone" 
                     dataKey="forecastRange" 
-                    fill="rgba(255, 0, 0, 0.15)" 
+                    fill="rgba(239, 68, 68, 0.12)" 
                     stroke="none" 
                     connectNulls
                   />
@@ -184,11 +190,11 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Raw Data Table Section */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex-1">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Tarixiy ma'lumotlar jadvallari (Xom ashyo)</h2>
+          <div className="bg-white/75 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 flex-1">
+            <h2 className="text-xl font-bold text-slate-900 mb-4">Tarixiy ma'lumotlar jadvallari (Xom ashyo)</h2>
             <div className="overflow-x-auto">
-              <table className="min-w-full text-sm text-left text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-100">
+              <table className="min-w-full text-sm text-left text-slate-600">
+                <thead className="text-xs text-slate-700 uppercase bg-white/50 backdrop-blur-sm border-b border-white/60">
                   <tr>
                     <th className="px-4 py-3">Sana (Date)</th>
                     <th className="px-4 py-3">Kategoriya</th>
@@ -201,11 +207,11 @@ export default function ProductDetailsPage() {
                 </thead>
                 <tbody>
                   {rawData.map((row: any, i: number) => (
-                    <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{row.Date}</td>
+                    <tr key={i} className="border-b border-white/40 hover:bg-white/50 transition-colors">
+                      <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">{row.Date}</td>
                       <td className="px-4 py-3">{row.Category}</td>
-                      <td className="px-4 py-3">{Number(row.Current_Price).toLocaleString()}</td>
-                      <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-green-600' : row.Trend === '▼' ? 'text-red-600' : 'text-gray-400'}`}>{row.Trend}</td>
+                      <td className="px-4 py-3 font-medium text-slate-900">{Number(row.Current_Price).toLocaleString()}</td>
+                      <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-emerald-600' : row.Trend === '▼' ? 'text-rose-600' : 'text-slate-400'}`}>{row.Trend}</td>
                       <td className="px-4 py-3">{Number(row.Price_Change).toLocaleString()}</td>
                       <td className="px-4 py-3">{row.Price_Change_Percent}%</td>
                       <td className="px-4 py-3 text-xs">{row.Period}</td>
@@ -213,7 +219,7 @@ export default function ProductDetailsPage() {
                   ))}
                   {rawData.length === 0 && (
                      <tr>
-                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                       <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
                          Ma'lumot topilmadi
                        </td>
                      </tr>
