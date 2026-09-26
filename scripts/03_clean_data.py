@@ -129,8 +129,9 @@ def clean_data(input_csv, output_csv, cache_file):
             for row in reader:
                 # all_data.csv has latinized names, so we can just look them up
                 original_name = row['Product_Name']
+                existing_unit = row.get('Unit', None)
                 translated_name = translate_to_uzbek(original_name, translation_cache)
-                clean_name, unit = parse_product_unit(translated_name)
+                clean_name, unit = parse_product_unit(translated_name, existing_unit)
                 row['Product_Name'] = clean_name
                 row['Unit'] = unit
                 

@@ -3,9 +3,9 @@ import re
 import os
 import sys
 
-def parse_product_unit(name):
+def parse_product_unit(name, existing_unit=None):
     if not name:
-        return name, 'tonna'
+        return name, existing_unit if existing_unit else 'tonna'
         
     unit_defs = [
         # (dona) and synonyms
@@ -54,7 +54,7 @@ def parse_product_unit(name):
     clean_name = re.sub(r'[\s,\-]+$', '', clean_name).strip()
     
     if not found_unit:
-        found_unit = 'tonna'
+        found_unit = existing_unit if existing_unit else 'tonna'
         
     return clean_name, found_unit
 
@@ -82,7 +82,8 @@ def process_file(file_path):
             
             for row in reader:
                 orig_name = row['Product_Name']
-                clean_name, unit = parse_product_unit(orig_name)
+                existing_unit = row.get('Unit', None)
+                clean_name, unit = parse_product_unit(orig_name, existing_unit)
                 
                 row['Product_Name'] = clean_name
                 row['Unit'] = unit
@@ -115,7 +116,8 @@ def process_forecasts(file_path):
             writer.writeheader()
             for row in reader:
                 orig_name = row['Product_Name']
-                clean_name, unit = parse_product_unit(orig_name)
+                existing_unit = row.get('Unit', None)
+                clean_name, unit = parse_product_unit(orig_name, existing_unit)
                 row['Product_Name'] = clean_name
                 row['Unit'] = unit
                 row_count += 1

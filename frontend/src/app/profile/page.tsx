@@ -80,9 +80,31 @@ export default function ProfilePage() {
               )}
             </div>
             <div className="flex-1">
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Profil rasmi (URL)</label>
-              <input type="url" value={profilePicture} onChange={e => setProfilePicture(e.target.value)} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 text-slate-900 transition-all shadow-2xs" placeholder="https://example.com/avatar.jpg" />
-              <p className="text-xs text-slate-400 mt-2 font-medium">Iltimos, o'z rasmingizga havolani (URL) kiriting.</p>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Profil rasmi</label>
+              <input 
+                type="file" 
+                accept="image/*"
+                onChange={async (e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    const file = e.target.files[0];
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    try {
+                      const res = await fetch("/api/upload", { method: "POST", body: formData });
+                      const data = await res.json();
+                      if (data.success) {
+                        setProfilePicture(data.url);
+                      } else {
+                        alert(data.error || "Rasm yuklashda xatolik");
+                      }
+                    } catch (err) {
+                      alert("Rasm yuklashda xatolik");
+                    }
+                  }
+                }} 
+                className="w-full p-2 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 text-slate-900 transition-all shadow-2xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+              />
+              {profilePicture && <p className="text-xs text-slate-400 mt-2 font-medium">Rasm yuklandi: {profilePicture.split('/').pop()}</p>}
             </div>
           </div>
           

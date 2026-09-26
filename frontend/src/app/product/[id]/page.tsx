@@ -184,9 +184,9 @@ export default function ProductDetailsPage() {
                     }}
                   />
                   <Area 
-                    type="monotone" 
+                    type="linear" 
                     dataKey="forecastRange" 
-                    fill="rgba(239, 68, 68, 0.12)" 
+                    fill="rgba(239, 68, 68, 0.2)" 
                     stroke="none" 
                     connectNulls
                   />
@@ -199,7 +199,7 @@ export default function ProductDetailsPage() {
                     activeDot={{ r: 6 }} 
                   />
                   <Line 
-                    type="monotone" 
+                    type="linear" 
                     dataKey="forecastMedian" 
                     stroke="#dc2626" 
                     strokeWidth={3}
