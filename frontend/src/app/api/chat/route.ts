@@ -131,8 +131,10 @@ export async function POST(req: Request) {
           if (!contextData) contextData = "Here is the most relevant market data based on the user's query:\n\n";
           contextData += "Active B2B Marketplace Offers:\n";
           offers.forEach((offer: any) => {
+            const offerPriceNum = Number(offer.price) || 0;
+            const offerUsd = exchangeRate > 0 ? (offerPriceNum / exchangeRate).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—";
             contextData += `- Supplier: ${offer.companyName} is offering ${offer.productName}\n`;
-            contextData += `  Price: ${offer.price} UZS\n`;
+            contextData += `  Price: ${offerPriceNum.toLocaleString("uz-UZ")} UZS (~ $${offerUsd} USD)\n`;
             if (offer.description) contextData += `  Description: ${offer.description}\n`;
             if (offer.phoneNumber || offer.contact) contextData += `  Contact: ${offer.phoneNumber || offer.contact}\n`;
             contextData += "\n";
