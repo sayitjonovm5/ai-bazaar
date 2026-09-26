@@ -25,7 +25,9 @@ const categories = [
   { label: "Oziq-ovqat / Qishloq", value: "Qishloq xo'jaligi va oziq-ovqat" },
   { label: "Kimyoviy", value: "Kimyoviy moddalar" },
   { label: "Polimerlar", value: "Polimerlar va plastmassa" },
+  { label: "Boshqa", value: "Boshqa" },
 ];
+
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -39,8 +41,8 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
-  const [view, changeView] = useProductView();
-  const [visibleCount, setVisibleCount] = useState(60);
+  const [view, setView] = useProductView();
+
   const { data: session } = useSession();
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export default function SearchPage() {
       });
     return () => controller.abort();
   }, [attempt]);
+
   useEffect(() => {
     if (!session?.user) return;
     const controller = new AbortController();
@@ -114,19 +117,25 @@ export default function SearchPage() {
     }
   };
 
-  const filteredProducts = Array.isArray(products) ? products
-    .filter(p => {
-      const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            (p.category || "").toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-      const isContractAllowed = (!p.contractType) || (p.contractType === 'Spot' && showSpot) || (p.contractType === 'Forvard' && showForvard);
-      return matchesSearch && matchesCategory && isContractAllowed;
-    }) : [];
-    
+  const filteredProducts = Array.isArray(products)
+    ? products.filter((p) => {
+        const matchesSearch =
+          p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (p.category || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory =
+          selectedCategory === "All" || p.category === selectedCategory;
+        const isContractAllowed =
+          !p.contractType ||
+          (p.contractType === "Spot" && showSpot) ||
+          (p.contractType === "Forvard" && showForvard);
+        return matchesSearch && matchesCategory && isContractAllowed;
+      })
+    : [];
+
   const displayedProducts = filteredProducts.slice(0, displayCount);
 
   return (
-    <div className="max-w-5xl mx-auto py-6">
+    <div className="max-w-6xl mx-auto py-6">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Mahsulotlar Qidiruvi</h1>
@@ -143,19 +152,13 @@ export default function SearchPage() {
           className="block w-full pl-11 pr-4 py-3 border border-white/70 rounded-2xl leading-5 bg-white/65 backdrop-blur-xl placeholder-slate-400 text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 sm:text-sm shadow-2xs transition-all"
           placeholder="Nomi yoki toifasi bo'yicha qidirish (masalan: Avtobenzin, Sement, Armatura)..."
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setVisibleCount(60);
-          }}
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
         {searchTerm && (
           <button
-            onClick={() => {
-              setSearchTerm("");
-              setVisibleCount(60);
-            }}
+            onClick={() => setSearchTerm("")}
             aria-label="Qidiruvni tozalash"
-            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100 cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -168,7 +171,7 @@ export default function SearchPage() {
           <button
             key={cat.value}
             onClick={() => setSelectedCategory(cat.value)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all cursor-pointer ${
               selectedCategory === cat.value
                 ? "bg-slate-900 text-white shadow-xs"
                 : "bg-white/60 backdrop-blur-md text-slate-700 hover:bg-white/80 border border-white/60"
@@ -182,42 +185,92 @@ export default function SearchPage() {
         ))}
       </div>
 
-      {/* Contract Type Toggles */}
-      <div className="flex flex-wrap items-center gap-8 mb-6 px-2">
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <div className="relative">
-            <input type="checkbox" className="sr-only peer" checked={showSpot} onChange={() => setShowSpot(!showSpot)} />
-            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </div>
-          <span className="text-sm font-medium text-gray-700 select-none">Spot tovarlarni ko'rsatish</span>
-          <div className="relative flex items-center">
-            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
-              Spot - Darhol (shu zahoti) yetkazib beriladigan tovarlar. Odatdagi bozor narxlari.
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+      {/* Contract Type Toggles and View Mode Switcher */}
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6 px-1">
+        <div className="flex flex-wrap items-center gap-6">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={showSpot}
+                onChange={() => setShowSpot(!showSpot)}
+              />
+              <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </div>
-          </div>
-        </label>
+            <span className="text-sm font-medium text-gray-700 select-none">
+              Spot tovarlarni ko'rsatish
+            </span>
+            <div className="relative flex items-center">
+              <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                Spot - Darhol (shu zahoti) yetkazib beriladigan tovarlar. Odatdagi bozor narxlari.
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </label>
 
-        <label className="flex items-center gap-2 cursor-pointer group">
-          <div className="relative">
-            <input type="checkbox" className="sr-only peer" checked={showForvard} onChange={() => setShowForvard(!showForvard)} />
-            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
-          </div>
-          <span className="text-sm font-medium text-gray-700 select-none">Forvard tovarlarni ko'rsatish</span>
-          <div className="relative flex items-center">
-            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
-            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
-              Forvard - Kelajakda belgilangan muddatda yetkazib beriladigan tovarlar (narxi oldindan qulflanadi).
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <div className="relative">
+              <input
+                type="checkbox"
+                className="sr-only peer"
+                checked={showForvard}
+                onChange={() => setShowForvard(!showForvard)}
+              />
+              <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
             </div>
-          </div>
-        </label>
+            <span className="text-sm font-medium text-gray-700 select-none">
+              Forvard tovarlarni ko'rsatish
+            </span>
+            <div className="relative flex items-center">
+              <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+                Forvard - Kelajakda belgilangan muddatda yetkazib beriladigan tovarlar (narxi oldindan qulflanadi).
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+              </div>
+            </div>
+          </label>
+        </div>
+
+        {/* View Switcher: List vs Grid / Tiles */}
+        <div
+          role="group"
+          aria-label="Mahsulotlar ko'rinishi"
+          className="flex items-center gap-1 p-1 bg-white/75 backdrop-blur-md border border-white/60 rounded-xl shadow-2xs"
+        >
+          <button
+            type="button"
+            onClick={() => setView("list")}
+            aria-pressed={view === "list"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              view === "list"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+            }`}
+          >
+            <List className="h-3.5 w-3.5" />
+            Ro'yxat
+          </button>
+          <button
+            type="button"
+            onClick={() => setView("grid")}
+            aria-pressed={view === "grid"}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+              view === "grid"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Kataklar
+          </button>
+        </div>
       </div>
 
-      {/* View Switcher and Product Count */}
-      <div className="flex items-center justify-between gap-3 mb-5 px-1">
-        <p className="text-xs text-slate-500 font-medium">
+      {/* Results counter */}
+      <div className="flex items-center justify-between mb-4 px-1 text-xs text-slate-500 font-medium">
+        <p>
           {isLoading ? (
             "Mahsulotlar yuklanmoqda..."
           ) : (
@@ -225,41 +278,15 @@ export default function SearchPage() {
               <span className="font-bold text-slate-900">
                 {filteredProducts.length.toLocaleString("uz-UZ")}
               </span>{" "}
-              ta mahsulot topildi
+              ta mahsulot{searchTerm && " topildi"}
             </>
           )}
         </p>
-
-        <div className="flex items-center gap-1 p-1 bg-white/70 backdrop-blur-md border border-white/70 rounded-xl shadow-2xs">
-          <button
-            type="button"
-            onClick={() => changeView("list")}
-            aria-pressed={view === "list"}
-            title="Ro'yxat ko'rinishi"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              view === "list"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-            }`}
-          >
-            <List size={15} />
-            <span>Ro‘yxat</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => changeView("grid")}
-            aria-pressed={view === "grid"}
-            title="Kataklar (plitka) ko'rinishi"
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-              view === "grid"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-            }`}
-          >
-            <LayoutGrid size={15} />
-            <span>Kataklar</span>
-          </button>
-        </div>
+        {!isLoading && filteredProducts.length > 0 && (
+          <p>
+            {Math.min(displayedProducts.length, filteredProducts.length)} / {filteredProducts.length.toLocaleString("uz-UZ")} ko'rsatilmoqda
+          </p>
+        )}
       </div>
 
       {error ? (
@@ -335,7 +362,7 @@ export default function SearchPage() {
             }
           >
             {displayedProducts.map((product) => (
-              <ProductRow 
+              <ProductRow
                 key={product.id}
                 {...product}
                 view={view}
@@ -348,8 +375,8 @@ export default function SearchPage() {
 
           {filteredProducts.length > displayCount && (
             <div className="flex justify-center mt-8 mb-4">
-              <button 
-                onClick={() => setDisplayCount(prev => prev + 60)}
+              <button
+                onClick={() => setDisplayCount((prev) => prev + 60)}
                 className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all cursor-pointer"
               >
                 Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)

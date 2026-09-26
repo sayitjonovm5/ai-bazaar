@@ -4,12 +4,14 @@ import Link from "next/link";
 import ProductIcon from "./ProductIcon";
 import { formatUnit, type Product } from "@/lib/market-ui";
 import { useCurrency } from "@/lib/currency-context";
+
 interface ProductRowProps extends Product {
   onPinToggle?: (id: string) => void;
   isPinned?: boolean;
   isPending?: boolean;
   view?: "list" | "grid";
 }
+
 export function PriceChange({ value }: { value: number }) {
   const change = Number.isFinite(value) ? value : 0;
   const Icon = change > 0 ? ArrowUpRight : change < 0 ? ArrowDownRight : Minus;
@@ -32,6 +34,7 @@ export function PriceChange({ value }: { value: number }) {
     </span>
   );
 }
+
 export default function ProductRow({
   id,
   name,
@@ -62,7 +65,7 @@ export default function ProductRow({
         isPinned ? "Asosiy paneldan olib tashlash" : "Asosiy panelga qistirish"
       }
       className={
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors " +
+        "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors cursor-pointer " +
         (isPinned
           ? "bg-blue-600/15 text-blue-700 border border-blue-500/20"
           : "text-slate-400 hover:bg-white/80 hover:text-slate-700")
@@ -71,7 +74,8 @@ export default function ProductRow({
       <Pin className="h-4 w-4" fill={isPinned ? "currentColor" : "none"} />
     </button>
   );
-  if (view === "grid")
+
+  if (view === "grid") {
     return (
       <article
         className="group flex min-w-0 flex-col justify-between p-5 bg-white/75 backdrop-blur-xl border border-white/60 shadow-2xs hover:shadow-md hover:bg-white/90 rounded-2xl transition-all"
@@ -115,21 +119,13 @@ export default function ProductRow({
         </div>
       </article>
     );
+  }
+
   return (
     <div className="group flex items-center justify-between p-4 mb-2 bg-white/75 backdrop-blur-md border border-white/60 shadow-2xs hover:shadow-sm hover:bg-white/90 rounded-xl transition-all">
       <div className="flex-1 min-w-0 pr-4 flex items-center">
-        {onPinToggle && (
-          <button
-            onClick={() => onPinToggle(id)}
-            className={`mr-3 p-1.5 rounded-full transition-colors ${
-              isPinned ? "bg-blue-600/15 text-blue-700 border border-blue-500/20" : "text-slate-300 hover:text-slate-600 hover:bg-white/60"
-            }`}
-            title={isPinned ? "Asosiy paneldan olib tashlash" : "Asosiy panelga qistirish"}
-          >
-            <Pin className="h-4 w-4" />
-          </button>
-        )}
-        <Link href={`/product/${id}`} className="flex items-center min-w-0 group/link hover:text-blue-600">
+        {pin && <div className="mr-3">{pin}</div>}
+        <Link href={`/product/${encodeURIComponent(id)}`} className="flex items-center min-w-0 group/link hover:text-blue-600">
           <ProductIcon name={name} category={category} size="sm" className="mr-3" />
           <span className="truncate font-semibold text-slate-900 group-hover/link:text-blue-600">
             {name}

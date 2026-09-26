@@ -4,11 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Menu, X, Sparkles, ChevronDown } from "lucide-react";
-import { useSession, signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useAuthModal } from "@/components/AuthModal";
 
 export default function LandingNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { data: session } = useSession();
+  const { openAuthModal } = useAuthModal();
 
   return (
     <header className="sticky top-0 z-50 w-full transition-all backdrop-blur-md bg-white/75 border-b border-slate-200/50 shadow-2xs">
@@ -95,7 +97,7 @@ export default function LandingNavbar() {
               </Link>
             ) : (
               <button
-                onClick={() => signIn("credentials")}
+                onClick={() => openAuthModal("signin")}
                 className="text-sm font-medium text-slate-700 hover:text-slate-950 transition-colors px-3 py-2 cursor-pointer"
               >
                 Kirish

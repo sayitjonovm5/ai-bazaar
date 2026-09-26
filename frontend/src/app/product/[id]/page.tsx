@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "next/navigation";
@@ -135,11 +135,14 @@ export default function ProductDetailsPage() {
               }`}>
                 {contractType}
               </span>
+<<<<<<< HEAD
               {productUnit && (
                 <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg border border-slate-200">
                   {productUnit}
                 </span>
               )}
+=======
+>>>>>>> Asliddin
             </div>
             <p className="text-slate-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
           </div>
@@ -237,7 +240,7 @@ export default function ProductDetailsPage() {
                       <td className="px-4 py-3">{row.Category}</td>
                       <td className="px-4 py-3 text-xs font-semibold text-blue-600">{row.Unit || productUnit}</td>
                       <td className="px-4 py-3 font-medium text-slate-900">{Number(row.Current_Price).toLocaleString()}</td>
-                      <td className={`px-4 py-3 font-bold ${row.Trend === 'Γû▓' ? 'text-emerald-600' : row.Trend === 'Γû╝' ? 'text-rose-600' : 'text-slate-400'}`}>{row.Trend}</td>
+                      <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-emerald-600' : row.Trend === '▼' ? 'text-rose-600' : 'text-slate-400'}`}>{row.Trend}</td>
                       <td className="px-4 py-3">{Number(row.Price_Change).toLocaleString()}</td>
                       <td className="px-4 py-3">{row.Price_Change_Percent}%</td>
                       <td className="px-4 py-3 text-xs">{row.Period}</td>

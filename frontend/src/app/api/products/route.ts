@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { parse } from "csv-parse/sync";
+import Papa from "papaparse";
 
 export async function GET() {
   try {
@@ -12,14 +12,17 @@ export async function GET() {
     }
 
     const fileContent = fs.readFileSync(csvFilePath, "utf-8");
-    const records = parse(fileContent, { columns: true, skip_empty_lines: true });
+    const { data: records } = Papa.parse(fileContent, { header: true, skipEmptyLines: true });
 
     // Group by Product_Name + Unit
     const productMap = new Map();
 
     records.forEach((row: any) => {
-      const priceRaw = row.Current_Price_Sum || row.Average_Price || "";
-      const priceStr = String(priceRaw).replace(/[\s,]/g, "");
+      if (!row.Product_Name) return;
+      const rawPrice = row.Current_Price_Sum || row.Average_Price || row.Price;
+      if (!rawPrice) return;
+      
+      const priceStr = String(rawPrice).replace(/[\s,]/g, "");
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       
@@ -34,7 +37,7 @@ export async function GET() {
         productMap.set(key, {
           id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
           name: cleanName,
-          category: row.Category || "Other",
+          category: row.Category || "Boshqa",
           contractType: contractType,
           unit: unit,
           currentPrice: price,
@@ -49,7 +52,12 @@ export async function GET() {
       }
     });
 
-    const products = Array.from(productMap.values());
+    const products = Array.from(productMap.values()).map((p: any) => {
+      // Keep only last 10 prices for sparkline chart to keep payload snappy and fast
+      p.historicalPrices = p.historicalPrices.slice(-10);
+      return p;
+    });
+
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error reading CSV:", error);

@@ -3,25 +3,32 @@
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import { CurrencyProvider } from "@/lib/currency-context";
+import { AuthModalProvider } from "@/components/AuthModal";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <SessionProvider>
       <CurrencyProvider>
-        {children}
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              fontSize: "13px",
-              borderRadius: "12px",
-              border: "1px solid #dfe5ee",
-              padding: "14px 18px",
-            },
-          }}
-        />
+        <AuthModalProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              duration: 4000,
+              style: {
+                background: "rgba(255, 255, 255, 0.9)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255, 255, 255, 0.8)",
+                color: "#18243b",
+                fontWeight: 500,
+                fontSize: "13px",
+                borderRadius: "16px",
+                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.08)",
+              },
+            }}
+          />
+        </AuthModalProvider>
       </CurrencyProvider>
     </SessionProvider>
   );
 }
-
