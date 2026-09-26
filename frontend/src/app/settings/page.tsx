@@ -1,18 +1,58 @@
 "use client";
 
-import { useState } from "react";
-import { Settings as SettingsIcon, Bell, Shield, Database, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Bell, Shield, Database, Save, RefreshCw } from "lucide-react";
+import { useCurrency, type Currency } from "@/lib/currency-context";
 
 export default function SettingsPage() {
-  const [currency, setCurrency] = useState("UZS");
+  const {
+    currency: activeCurrency,
+    setCurrency: setActiveCurrency,
+    rate,
+    rateDate,
+    rateSource,
+    isLoadingRate,
+  } = useCurrency();
+
+  const [currency, setCurrency] = useState<Currency>(activeCurrency);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [notifications, setNotifications] = useState(true);
+  const [saveError, setSaveError] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setCurrency(activeCurrency);
+  }, [activeCurrency]);
+
+  useEffect(() => {
+    try {
+      const value = localStorage.getItem("narxnazar-preferences");
+      if (!value) return;
+      const preferences = JSON.parse(value);
+      if (preferences.currency === "USD" || preferences.currency === "UZS") {
+        setCurrency(preferences.currency);
+      }
+      setAutoRefresh(preferences.autoRefresh !== false);
+      setNotifications(preferences.notifications !== false);
+    } catch {
+      /* Default preferences remain available. */
+    }
+  }, []);
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    try {
+      setActiveCurrency(currency);
+      localStorage.setItem(
+        "narxnazar-preferences",
+        JSON.stringify({ currency, autoRefresh, notifications }),
+      );
+      setSaved(true);
+      setSaveError(false);
+    } catch {
+      setSaved(false);
+      setSaveError(true);
+    }
   };
 
   return (
@@ -22,7 +62,11 @@ export default function SettingsPage() {
         <p className="text-slate-500 mt-1">Bozor tahlili sozlamalarini o'zgartiring.</p>
       </div>
 
-      <form onSubmit={handleSave} className="space-y-6">
+      <form
+        onSubmit={handleSave}
+        className="space-y-5"
+        onChange={() => setSaved(false)}
+      >
         {/* Market Preferences */}
         <div className="bg-white/75 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="flex items-center gap-3 mb-6">
@@ -39,21 +83,46 @@ export default function SettingsPage() {
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1">Asosiy valyuta</label>
               <select
+                id="currency"
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
                 className="w-full max-w-xs px-3.5 py-2.5 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl text-sm text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 shadow-2xs"
               >
-                <option value="UZS">UZS (O'zbek so'mi)</option>
+                <option value="UZS">UZS (O‘zbek so‘mi)</option>
                 <option value="USD">USD (AQSh dollari)</option>
               </select>
+
+              <div className="mt-3 max-w-md rounded-lg border border-blue-100 bg-blue-50/70 p-3 text-xs text-blue-800">
+                <div className="flex items-center justify-between font-medium">
+                  <span className="flex items-center gap-1.5">
+                    {isLoadingRate && (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    )}
+                    Markaziy Bank (CBU) rasmiy kursi:
+                  </span>
+                  <span className="font-semibold tabular-nums">
+                    1 USD ={" "}
+                    {rate.toLocaleString("uz-UZ", {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    UZS
+                  </span>
+                </div>
+                <div className="mt-1 flex items-center justify-between text-[11px] text-blue-600/80">
+                  <span>Manba: {rateSource}</span>
+                  {rateDate && <span>Sana: {rateDate}</span>}
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center justify-between gap-5 pt-2">
               <div>
                 <span className="text-sm font-semibold text-slate-900">Mahsulot narxlarini avtomatik yangilash</span>
                 <p className="text-xs text-slate-500">Birja narxlarini va haftalik prognozlarni muntazam yangilab turish</p>
               </div>
               <input
+                id="auto-refresh"
+                aria-label="Mahsulot narxlarini avtomatik yangilash"
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
@@ -75,12 +144,14 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-5">
             <div>
               <span className="text-sm font-semibold text-slate-900">Narx anomaliyasi ogohlantirishlari</span>
               <p className="text-xs text-slate-500">Narxlar prognozdan tashqariga chiqqanda ogohlantirish olish</p>
             </div>
             <input
+              id="notifications"
+              aria-label="Narx anomaliyasi ogohlantirishlari"
               type="checkbox"
               checked={notifications}
               onChange={(e) => setNotifications(e.target.checked)}

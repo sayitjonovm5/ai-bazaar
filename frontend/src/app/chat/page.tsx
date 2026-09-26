@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import ProductIcon from "@/components/ProductIcon";
 
@@ -9,35 +9,47 @@ export default function ChatPage() {
     {
       id: 1,
       role: "assistant",
-      content: "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so'rashingiz mumkin.",
+      content:
+        "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so‘rashingiz mumkin.",
     },
   ]);
+  const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "nearest" });
+  }, [messages, isLoading]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setMessages(prev => [...prev, { id: Date.now(), role: "user", content: userMessage }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", content: userMessage },
+    ]);
     setInput("");
     setIsLoading(true);
-    
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage }),
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok) {
-        throw new Error(data.error || "AI bilan bog'lanishda xatolik yuz berdi.");
+        throw new Error(
+          data.error || "AI bilan bog'lanishda xatolik yuz berdi.",
+        );
       }
-      
-      setMessages(prev => [
+
+      setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
@@ -45,14 +57,14 @@ export default function ChatPage() {
           content: data.reply,
         },
       ]);
-    } catch (err: any) {
-      console.error(err);
-      setMessages(prev => [
+    } catch {
+      setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
           role: "assistant",
-          content: `⚠️ Error: ${err.message}`,
+          content:
+            "Hozir AI bilan bog‘lanib bo‘lmadi. Birozdan so‘ng qayta urinib ko‘ring.",
         },
       ]);
     } finally {
@@ -69,7 +81,12 @@ export default function ChatPage() {
 
       <div className="flex-1 bg-white/75 backdrop-blur-2xl rounded-3xl shadow-sm border border-white/60 flex flex-col overflow-hidden">
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div
+          role="log"
+          aria-label="AI bilan suhbat"
+          aria-live="polite"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
+        >
           {messages.map((msg) => (
             <div key={msg.id} className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
               <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${msg.role === "user" ? "bg-blue-500/15 border-blue-500/25 text-blue-700" : "bg-emerald-500/15 border-emerald-500/25 text-emerald-700"}`}>
@@ -101,7 +118,8 @@ export default function ChatPage() {
                   },
                   {
                     name: "Armatura diametri 12 mm",
-                    query: "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
+                    query:
+                      "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
                     category: "Metallurgiya",
                   },
                   {
@@ -114,10 +132,15 @@ export default function ChatPage() {
                     key={item.query}
                     onClick={() => {
                       setInput(item.query);
+                      inputRef.current?.focus();
                     }}
                     className="flex items-center gap-3 p-3 text-left rounded-xl bg-white/60 backdrop-blur-md border border-white/70 hover:bg-white/90 hover:border-blue-300 hover:shadow-xs transition-all text-xs text-slate-700 hover:text-blue-900 group"
                   >
-                    <ProductIcon name={item.name} category={item.category} size="sm" />
+                    <ProductIcon
+                      name={item.name}
+                      category={item.category}
+                      size="sm"
+                    />
                     <div className="min-w-0">
                       <div className="font-semibold text-slate-900 group-hover:text-blue-600 truncate">{item.name}</div>
                       <div className="text-slate-500 truncate mt-0.5">{item.query}</div>
@@ -140,12 +163,15 @@ export default function ChatPage() {
               </div>
             </div>
           )}
+          <div ref={endRef} />
         </div>
 
         {/* Chat Input */}
         <div className="p-4 bg-white/40 backdrop-blur-md border-t border-white/50">
           <form onSubmit={handleSend} className="relative flex items-center">
             <input
+              ref={inputRef}
+              aria-label="AI tahlilchiga savol"
               type="text"
               disabled={isLoading}
               placeholder="Narx tendensiyalari haqida so'rang, masalan: 'Sement narxi nega bugun oshdi?'"

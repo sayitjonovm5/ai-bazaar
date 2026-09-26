@@ -2,19 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, Search, Plus, Phone, ArrowLeft } from "lucide-react";
+import { ChevronDown, Search, Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { useSession, signIn } from "next-auth/react";
+import { type Product } from "@/lib/market-ui";
+import { LoadingState } from "@/components/MarketFeedback";
 
 export default function AddOfferPage() {
   const router = useRouter();
-  const [products, setProducts] = useState<any[]>([]);
+  const { status } = useSession();
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  
+
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     productName: "",
     companyName: "",
@@ -26,49 +31,75 @@ export default function AddOfferPage() {
     instagram: "",
     telegram: "",
   });
-  
+
   const [showMoreContact, setShowMoreContact] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetch("/api/products")
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => {
+        if (!res.ok) throw new Error("Mahsulotlarni yuklab bo‘lmadi.");
+        return res.json();
+      })
+      .then((data) => {
+        if (!Array.isArray(data))
+          throw new Error("Mahsulotlarni yuklab bo‘lmadi.");
         setProducts(data);
-        const cats = Array.from(new Set(data.map((p: any) => p.category))) as string[];
+        setProductsLoading(false);
+        const cats = Array.from(
+          new Set((data as Product[]).map((p) => p.category).filter(Boolean)),
+        ) as string[];
         setCategories(cats);
       })
-      .catch(console.error);
+      .catch(() => {
+        setProductsLoading(false);
+        setError("Mahsulotlarni yuklab bo‘lmadi. Sahifani yangilang.");
+      });
   }, []);
 
-  const filteredProducts = products.filter(p => {
-    const matchesCat = selectedCategory ? p.category === selectedCategory : true;
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredProducts = products.filter((p) => {
+    const matchesCat = selectedCategory
+      ? p.category === selectedCategory
+      : true;
+    const matchesSearch = p.name
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.productName || !formData.companyName || !formData.price || !formData.phoneNumber) {
+    if (
+      !formData.productName ||
+      !formData.companyName ||
+      !formData.price ||
+      !formData.phoneNumber
+    ) {
       setError("Iltimos barcha majburiy maydonlarni to'ldiring");
       return;
     }
-    
+
+    setError("");
     setIsSubmitting(true);
     try {
-      const res = await fetch(`/api/product/${encodeURIComponent(formData.productName)}/suppliers`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-      
-      if (!res.ok) throw new Error("Taklif qo'shishda xatolik yuz berdi");
-      
+      const res = await fetch(
+        `/api/product/${encodeURIComponent(formData.productName)}/suppliers`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...formData, name: formData.companyName }),
+        },
+      );
+
+      if (!res.ok) throw new Error("Taklif qo‘shishda xatolik yuz berdi");
+
       router.push("/marketplace");
       router.refresh();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Taklifni saqlab bo‘lmadi.",
+      );
       setIsSubmitting(false);
     }
   };

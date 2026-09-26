@@ -1,45 +1,60 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { User, ArrowLeft } from "lucide-react";
+import { useSession, signIn } from "next-auth/react";
+import { User, ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
-
+import { LoadingState } from "@/components/MarketFeedback";
+import { readJson } from "@/lib/market-ui";
 export default function ProfilePage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [name, setName] = useState("");
   const [profilePicture, setProfilePicture] = useState("");
+  const [imageFailed, setImageFailed] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
-
+  const [failed, setFailed] = useState(false);
   useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name || "");
-      fetch("/api/profile").then(res => res.json()).then(data => {
-        if (data.profilePicture) setProfilePicture(data.profilePicture);
-        if (data.name) setName(data.name);
+    if (!session?.user) return;
+    const controller = new AbortController();
+    readJson<{ name: string; profilePicture: string }>("/api/profile", {
+      signal: controller.signal,
+    })
+      .then((data) => {
+        setName(data.name || "");
+        setProfilePicture(data.profilePicture || "");
+        setLoaded(true);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setFailed(true);
+          setMessage("Profilni yuklab bo‘lmadi. Sahifani yangilang.");
+        }
       });
-    }
+    return () => controller.abort();
   }, [session]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSaving(true);
+    setMessage("");
     try {
-      const res = await fetch("/api/profile", {
+      await readJson("/api/profile", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, profilePicture }),
+        body: JSON.stringify({
+          name: name.trim(),
+          profilePicture: profilePicture.trim(),
+        }),
       });
-      if (!res.ok) throw new Error("Saqlashda xatolik yuz berdi");
+      setFailed(false);
       setMessage("Profil muvaffaqiyatli saqlandi!");
-    } catch (err: any) {
-      setMessage(err.message);
+    } catch {
+      setFailed(true);
+      setMessage("Saqlashda xatolik yuz berdi. Qayta urinib ko‘ring.");
     } finally {
       setIsSaving(false);
     }
-  };
-
+  }
   return (
     <div className="max-w-xl mx-auto py-12 px-4">
       <Link href="/marketplace" className="inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-900 mb-6 bg-white/60 hover:bg-white/90 px-4 py-2 rounded-xl backdrop-blur-md border border-white/70 shadow-2xs transition-all">

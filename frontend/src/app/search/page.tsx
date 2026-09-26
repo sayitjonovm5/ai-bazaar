@@ -1,11 +1,23 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProductRow from "@/components/ProductRow";
 import { Search as SearchIcon, Loader2, HelpCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ProductIcon from "@/components/ProductIcon";
+import { ErrorState } from "@/components/MarketFeedback";
+import { readJson, type Product } from "@/lib/market-ui";
+import toast from "react-hot-toast";
+import { useProductView } from "@/lib/use-product-view";
 
+const categories = [
+  { label: "Barchasi", value: "All" },
+  { label: "Yoqilg‘i", value: "Yoqilg'i" },
+  { label: "Metallurgiya", value: "Metallurgiya" },
+  { label: "Qurilish", value: "Qurilish materiallari" },
+  { label: "Oziq-ovqat / Qishloq", value: "Qishloq xo'jaligi va oziq-ovqat" },
+  { label: "Kimyoviy", value: "Kimyoviy moddalar" },
+  { label: "Polimerlar", value: "Polimerlar va plastmassa" },
+];
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -13,55 +25,47 @@ export default function SearchPage() {
   const [showForvard, setShowForvard] = useState(true);
   const [displayCount, setDisplayCount] = useState(60);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
-  const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
-  
-  const [products, setProducts] = useState<any[]>([]);
+  const [pendingIds, setPendingIds] = useState<string[]>([]);
+  const inFlight = useRef(new Set<string>());
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  const categories = [
-    { label: "Barchasi", value: "All" },
-    { label: "Yoqilg'i", value: "Yoqilg'i" },
-    { label: "Metallurgiya", value: "Metallurgiya" },
-    { label: "Qurilish", value: "Qurilish materiallari" },
-    { label: "Oziq-ovqat / Qishloq", value: "Qishloq xo'jaligi va oziq-ovqat" },
-    { label: "Kimyoviy", value: "Kimyoviy moddalar" },
-    { label: "Polimerlar", value: "Polimerlar va plastmassa" },
-  ];
-  
+  const [error, setError] = useState("");
+  const [attempt, setAttempt] = useState(0);
+  const [view, changeView] = useProductView();
+  const [visibleCount, setVisibleCount] = useState(60);
   const { data: session } = useSession();
 
-  // Fetch live products from CSV via our API
   useEffect(() => {
-    fetch("/api/products")
-      .then((res) => res.json())
+    const controller = new AbortController();
+    readJson<Product[]>("/api/products", { signal: controller.signal })
       .then((data) => {
+        if (!Array.isArray(data)) throw new Error("Invalid products");
         setProducts(data);
         setIsLoading(false);
       })
-      .catch((err) => {
-        console.error("Failed to load products:", err);
-        setIsLoading(false);
+      .catch(() => {
+        if (!controller.signal.aborted) {
+          setError(
+            "Bozor ma’lumotlarini hozir yuklab bo‘lmadi. Qayta urinib ko‘ring.",
+          );
+          setIsLoading(false);
+        }
       });
-  }, []);
-
-  // Fetch pinned product IDs from DB
+    return () => controller.abort();
+  }, [attempt]);
   useEffect(() => {
-    if (session?.user) {
-      fetch("/api/user/pins")
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setPinnedIds(data);
-            const pinned = products.filter(p => data.includes(p.id));
-            setPinnedProducts(pinned);
-          }
-        })
-        .catch(console.error);
-    } else {
-      setPinnedIds([]);
-      setPinnedProducts([]);
-    }
-  }, [session, products]);
+    if (!session?.user) return;
+    const controller = new AbortController();
+    readJson<string[]>("/api/user/pins", { signal: controller.signal })
+      .then((data) => {
+        if (Array.isArray(data)) setPinnedIds(data);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted)
+          toast.error("Saqlangan mahsulotlarni yuklab bo‘lmadi.");
+      });
+    return () => controller.abort();
+  }, [session]);
 
   // Reset display count when filters change
   useEffect(() => {
@@ -70,42 +74,35 @@ export default function SearchPage() {
 
   const handlePinToggle = async (id: string) => {
     if (!session?.user) {
-      alert("Mahsulotlarni qistirish uchun tizimga kiring.");
+      toast.error("Mahsulotni saqlash uchun tizimga kiring.");
       return;
     }
-
-    const isCurrentlyPinned = pinnedIds.includes(id);
-    const product = products.find(p => p.id === id);
-    if (!product) return;
-
-    let updatedProducts;
-    if (isCurrentlyPinned) {
-      updatedProducts = pinnedProducts.filter(p => p.id !== id);
-      setPinnedIds(prev => prev.filter(pId => pId !== id));
-    } else {
-      updatedProducts = [...pinnedProducts, product];
-      setPinnedIds(prev => [...prev, id]);
-    }
-
-    setPinnedProducts(updatedProducts);
-
+    if (inFlight.current.has(id)) return;
+    inFlight.current.add(id);
+    const wasPinned = pinnedIds.includes(id);
+    setPendingIds((prev) => [...prev, id]);
+    setPinnedIds((prev) =>
+      wasPinned ? prev.filter((p) => p !== id) : [...prev, id],
+    );
     try {
-      if (isCurrentlyPinned) {
-        await fetch("/api/user/pins", {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productName: id })
-        });
-      } else {
-        await fetch("/api/user/pins", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ productName: id })
-        });
-      }
-    } catch (err) {
-      console.error(err);
-      // Revert optimistic update omitted for brevity
+      await readJson("/api/user/pins", {
+        method: wasPinned ? "DELETE" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productName: id }),
+      });
+      toast.success(
+        wasPinned
+          ? "Mahsulot paneldan olib tashlandi"
+          : "Mahsulot asosiy panelga saqlandi",
+      );
+    } catch {
+      setPinnedIds((prev) =>
+        wasPinned ? [...prev, id] : prev.filter((p) => p !== id),
+      );
+      toast.error("O‘zgarish saqlanmadi. Qayta urinib ko‘ring.");
+    } finally {
+      inFlight.current.delete(id);
+      setPendingIds((prev) => prev.filter((p) => p !== id));
     }
   };
 
@@ -138,8 +135,23 @@ export default function SearchPage() {
           className="block w-full pl-11 pr-4 py-3 border border-white/70 rounded-2xl leading-5 bg-white/65 backdrop-blur-xl placeholder-slate-400 text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 sm:text-sm shadow-2xs transition-all"
           placeholder="Nomi yoki toifasi bo'yicha qidirish (masalan: Avtobenzin, Sement, Armatura)..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setVisibleCount(60);
+          }}
         />
+        {searchTerm && (
+          <button
+            onClick={() => {
+              setSearchTerm("");
+              setVisibleCount(60);
+            }}
+            aria-label="Qidiruvni tozalash"
+            className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* Category Pills with Icons */}
@@ -215,15 +227,26 @@ export default function SearchPage() {
               <ProductRow 
                 key={product.id}
                 {...product}
-                isPinned={pinnedIds.includes(product.id)}
+                view={view}
+                isPinned={!!session && pinnedIds.includes(product.id)}
+                isPending={pendingIds.includes(product.id)}
                 onPinToggle={handlePinToggle}
               />
             ))}
-
-            {filteredProducts.length === 0 && (
-              <div className="text-center py-12 text-gray-500">
-                "{searchTerm}" uchun mahsulot topilmadi
-              </div>
+          </div>
+          <div className="mt-6 flex flex-col items-center gap-3">
+            <p className="text-xs text-gray-500">
+              {matches.length.toLocaleString("uz-UZ")} ta mahsulotdan{" "}
+              {visible.length} tasi ko‘rsatilmoqda
+            </p>
+            {visible.length < matches.length && (
+              <button
+                onClick={() => setVisibleCount((c) => c + 60)}
+                className="button-secondary"
+              >
+                Ko‘proq ko‘rsatish
+                <ChevronDown size={15} />
+              </button>
             )}
             
             {filteredProducts.length > displayCount && (

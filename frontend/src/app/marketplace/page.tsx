@@ -1,8 +1,11 @@
 import { prisma } from "@/lib/prisma";
+import ImageFallback from "@/components/ImageFallback";
 import ProductIcon from "@/components/ProductIcon";
-import { User, Phone, Calendar, Store } from "lucide-react";
+import { User, Phone, Calendar, Store, Plus, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import MarketplaceSearch from "./MarketplaceSearch";
+import { formatDate } from "@/lib/market-ui";
+import ConvertedPrice from "@/components/ConvertedPrice";
 
 export default async function MarketplacePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const resolvedSearchParams = await searchParams;
@@ -61,7 +64,6 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
                 Tahlil &rarr;
               </Link>
             </div>
-            
             {offer.imageUrl ? (
               <div className="w-full h-48 bg-slate-100/60 relative overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -78,8 +80,13 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
               <div className="flex items-center gap-3 mb-4 border-b border-white/50 pb-4">
                 <div className="w-10 h-10 rounded-full bg-white/70 overflow-hidden border border-white/80 flex-shrink-0 flex items-center justify-center shadow-2xs">
                   {offer.user?.profilePicture ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={offer.user.profilePicture} alt="User" className="w-full h-full object-cover" />
+                    <ImageFallback
+                      key={offer.user.profilePicture}
+                      src={offer.user.profilePicture}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      fallback={<User size={15} className="text-gray-400" />}
+                    />
                   ) : (
                     <User className="w-5 h-5 text-slate-400" />
                   )}
@@ -107,7 +114,7 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
                 </div>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
       

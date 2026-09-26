@@ -1,11 +1,18 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession, signIn, signOut } from "next-auth/react";
-import { LayoutDashboard, Search, MessageSquare, Settings, LogOut, LogIn, User, Store } from "lucide-react";
+import {
+  LayoutDashboard,
+  Search,
+  MessageSquare,
+  Settings,
+  LogOut,
+  LogIn,
+  User,
+  Store,
+} from "lucide-react";
 import Image from "next/image";
-
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Marketplace", href: "/marketplace", icon: Store },
@@ -13,11 +20,9 @@ const navigation = [
   { name: "AI Analyst Chat", href: "/chat", icon: MessageSquare },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
-
 export default function Sidebar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
-
   return (
     <div className="flex h-full w-64 sm:w-68 flex-col shrink-0 bg-gradient-to-b from-[#2563EB] via-[#1D4ED8] to-[#1E3A8A] text-white shadow-xl select-none">
       {/* Brand Header */}
@@ -109,6 +114,6 @@ export default function Sidebar() {
           )}
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
