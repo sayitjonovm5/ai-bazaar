@@ -25,20 +25,24 @@ export async function GET() {
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       
+      const isForward = row.Product_Name.toLowerCase().includes('(forvard)');
+      const contractType = isForward ? "Forvard" : "Spot";
+      const cleanName = row.Product_Name.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
+      
       if (!productMap.has(row.Product_Name)) {
         productMap.set(row.Product_Name, {
-          id: row.Product_Name, // Using name as ID for simplicity
-          name: row.Product_Name,
+          id: row.Product_Name, // Using raw name as ID for URL routing
+          name: cleanName,
           category: row.Category || "Other",
-          unit: "unit", // Can be extracted from name if needed
+          contractType: contractType,
+          unit: "unit",
           currentPrice: price,
           changePercent: parseFloat(row.Price_Change_Percent) || 0,
-          historicalPrices: [price], // Will build this up
+          historicalPrices: [price],
         });
       } else {
         const p = productMap.get(row.Product_Name);
         p.historicalPrices.push(price);
-        // Assuming data is chronological, the last seen is the current price
         p.currentPrice = price;
         p.changePercent = parseFloat(row.Price_Change_Percent) || 0;
       }
