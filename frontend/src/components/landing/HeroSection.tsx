@@ -43,15 +43,7 @@ export default function HeroSection() {
         {/* Hero Content Container */}
         <div className="text-center max-w-4xl mx-auto">
           
-          {/* Subtle Announcement Badge */}
-          <div className="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-xs mb-8 hover:bg-white/25 transition-colors">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="flex h-2 w-2 rounded-full bg-emerald-400 -ml-3" />
-            <span className="text-xs font-semibold text-white flex items-center drop-shadow-xs">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 mr-1.5" />
-              Chronos-T5 AI 7 kunlik narx prognozlari tizimi ishga tushirildi
-            </span>
-          </div>
+
 
           {/* Main Headline (Previous Content in Pure White with Atmospheric Glow) */}
           <h1 className="text-4xl sm:text-6xl lg:text-[76px] font-extrabold tracking-tight text-white leading-[1.06] mb-6 drop-shadow-[0_2px_14px_rgba(30,58,138,0.3)]">
