@@ -135,6 +135,19 @@ export function AuthCard({
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     try {
+      // Check if real Google credentials are configured in .env
+      const checkRes = await fetch("/api/auth/google-status");
+      const checkData = await checkRes.json();
+
+      if (!checkData.configured) {
+        setIsGoogleLoading(false);
+        toast.error(
+          "Google OAuth kalitlari (.env) hali kiritilmagan. Iltimos, GOOGLE_CLIENT_ID va GOOGLE_CLIENT_SECRET ni kiriting yoki Email / Demo hisob orqali kiring.",
+          { duration: 6000 }
+        );
+        return;
+      }
+
       await signIn("google", { callbackUrl: window.location.href });
     } catch {
       toast.error("Google orqali kirishda xatolik yuz berdi.");
