@@ -2,13 +2,16 @@
 
 import { useState, useEffect } from "react";
 import ProductRow from "@/components/ProductRow";
-import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Loader2, HelpCircle } from "lucide-react";
 import { useSession } from "next-auth/react";
 import ProductIcon from "@/components/ProductIcon";
 
 export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [showSpot, setShowSpot] = useState(true);
+  const [showForvard, setShowForvard] = useState(true);
+  const [displayCount, setDisplayCount] = useState(60);
   const [pinnedIds, setPinnedIds] = useState<string[]>([]);
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
   
@@ -60,6 +63,11 @@ export default function SearchPage() {
     }
   }, [session, products]);
 
+  // Reset display count when filters change
+  useEffect(() => {
+    setDisplayCount(60);
+  }, [searchTerm, selectedCategory, showSpot, showForvard]);
+
   const handlePinToggle = async (id: string) => {
     if (!session?.user) {
       alert("Mahsulotlarni qistirish uchun tizimga kiring.");
@@ -106,9 +114,11 @@ export default function SearchPage() {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                             p.category.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === "All" || p.category === selectedCategory;
-      return matchesSearch && matchesCategory;
-    })
-    .slice(0, 60) : []; // Show top 60 results
+      const isContractAllowed = (p.contractType === 'Spot' && showSpot) || (p.contractType === 'Forvard' && showForvard);
+      return matchesSearch && matchesCategory && isContractAllowed;
+    }) : [];
+    
+  const displayedProducts = filteredProducts.slice(0, displayCount);
 
   return (
     <div className="max-w-5xl mx-auto py-6">
@@ -133,7 +143,7 @@ export default function SearchPage() {
       </div>
 
       {/* Category Pills with Icons */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-2 scrollbar-none">
         {categories.map((cat) => (
           <button
             key={cat.value}
@@ -152,6 +162,39 @@ export default function SearchPage() {
         ))}
       </div>
 
+      {/* Contract Type Toggles */}
+      <div className="flex flex-wrap items-center gap-8 mb-6 px-2">
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <div className="relative">
+            <input type="checkbox" className="sr-only peer" checked={showSpot} onChange={() => setShowSpot(!showSpot)} />
+            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </div>
+          <span className="text-sm font-medium text-gray-700 select-none">Spot tovarlarni ko'rsatish</span>
+          <div className="relative flex items-center">
+            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+              Spot - Darhol (shu zahoti) yetkazib beriladigan tovarlar. Odatdagi bozor narxlari.
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer group">
+          <div className="relative">
+            <input type="checkbox" className="sr-only peer" checked={showForvard} onChange={() => setShowForvard(!showForvard)} />
+            <div className="w-10 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+          </div>
+          <span className="text-sm font-medium text-gray-700 select-none">Forvard tovarlarni ko'rsatish</span>
+          <div className="relative flex items-center">
+            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 outline-none" />
+            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 text-center">
+              Forvard - Kelajakda belgilangan muddatda yetkazib beriladigan tovarlar (narxi oldindan qulflanadi).
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+            </div>
+          </div>
+        </label>
+      </div>
+
       <div className="space-y-1">
         <div className="flex items-center justify-between px-4 pb-2 text-sm font-medium text-gray-500">
           <div className="flex-1">Mahsulot Nomi</div>
@@ -168,7 +211,7 @@ export default function SearchPage() {
           </div>
         ) : (
           <>
-            {filteredProducts.map((product) => (
+            {displayedProducts.map((product) => (
               <ProductRow 
                 key={product.id}
                 {...product}
@@ -183,9 +226,14 @@ export default function SearchPage() {
               </div>
             )}
             
-            {filteredProducts.length === 50 && (
-              <div className="text-center py-4 text-sm text-gray-400">
-                Eng yaxshi 50 ta natija. Iltimos, qidiruvingizni qisqartiring.
+            {filteredProducts.length > displayCount && (
+              <div className="flex justify-center mt-8 mb-4">
+                <button 
+                  onClick={() => setDisplayCount(prev => prev + 60)}
+                  className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
+                >
+                  Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
+                </button>
               </div>
             )}
           </>

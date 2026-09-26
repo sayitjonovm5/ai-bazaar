@@ -4,8 +4,9 @@ import { User, Phone, Calendar, Store } from "lucide-react";
 import Link from "next/link";
 import MarketplaceSearch from "./MarketplaceSearch";
 
-export default async function MarketplacePage({ searchParams }: { searchParams: { q?: string } }) {
-  const q = searchParams?.q || "";
+export default async function MarketplacePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const resolvedSearchParams = await searchParams;
+  const q = resolvedSearchParams?.q || "";
   const offers = await prisma.supplierOffer.findMany({
     where: q ? {
       OR: [
