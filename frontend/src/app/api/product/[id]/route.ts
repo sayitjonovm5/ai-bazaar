@@ -27,18 +27,44 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       forecastData = parsed.data;
     }
 
+    const { searchParams } = new URL(request.url);
+    const unitParam = searchParams.get("unit");
+
     // Filter historical data for this product
-    const rawData = histData
-      .filter((row: any) => row.Product_Name === productId)
-      .map((row: any) => ({
-        Date: row.Date,
-        Category: row.Category,
-        Current_Price: String(row.Current_Price_Sum).replace(/[\s,]/g, ''),
-        Trend: row.Price_Change_Direction,
-        Price_Change: String(row.Price_Change_Sum).replace(/[\s,]/g, ''),
-        Price_Change_Percent: row.Price_Change_Percent,
-        Period: row.Last_Trading_Week
-      }));
+    let matchingRows = histData.filter((row: any) => row.Product_Name === productId);
+    if (matchingRows.length === 0) {
+      matchingRows = histData.filter((row: any) => (row.Product_Name || "").trim().toLowerCase() === productId.trim().toLowerCase());
+    }
+
+    // Determine unit
+    let resolvedUnit = unitParam;
+    if (unitParam) {
+      const filtered = matchingRows.filter((row: any) => row.Unit === unitParam);
+      if (filtered.length > 0) {
+        matchingRows = filtered;
+      }
+    } else if (matchingRows.length > 0) {
+      const unitCounts: Record<string, number> = {};
+      matchingRows.forEach((r: any) => {
+        const u = r.Unit || "tonna";
+        unitCounts[u] = (unitCounts[u] || 0) + 1;
+      });
+      resolvedUnit = Object.entries(unitCounts).sort((a, b) => b[1] - a[1])[0][0];
+      matchingRows = matchingRows.filter((row: any) => (row.Unit || "tonna") === resolvedUnit);
+    } else {
+      resolvedUnit = "tonna";
+    }
+
+    const rawData = matchingRows.map((row: any) => ({
+      Date: row.Date,
+      Category: row.Category,
+      Unit: row.Unit || resolvedUnit,
+      Current_Price: String(row.Current_Price_Sum).replace(/[\s,]/g, ''),
+      Trend: row.Price_Change_Direction,
+      Price_Change: String(row.Price_Change_Sum).replace(/[\s,]/g, ''),
+      Price_Change_Percent: row.Price_Change_Percent,
+      Period: row.Last_Trading_Week
+    }));
     
     let productHistory = rawData
       .map((row: any) => ({
@@ -61,7 +87,8 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
       const lastPoint = chartData[chartData.length - 1];
       
       // Look for a forecast
-      const forecastRow = forecastData.find((r: any) => r.Product_Name === productId);
+      const forecastRow = forecastData.find((r: any) => r.Product_Name === productId && (!r.Unit || r.Unit === resolvedUnit)) ||
+                          forecastData.find((r: any) => r.Product_Name === productId);
       
       if (forecastRow) {
         // Connect the last historical point to the forecast line
@@ -80,6 +107,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     return NextResponse.json({
       id: productId,
       name: productId,
+      unit: resolvedUnit,
       chartData,
       rawData
     });

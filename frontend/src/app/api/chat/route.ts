@@ -65,12 +65,14 @@ export async function POST(req: Request) {
           topMatches.forEach(row => {
             const price = row.Current_Price_Sum;
             const change = row.Price_Change_Percent || "0";
-            contextData += `- Product: ${row.Product_Name} (Category: ${row.Category})\n`;
-            contextData += `  Current Price: ${price} UZS (Changed by ${change}% recently).\n`;
+            const unit = row.Unit || "tonna";
+            contextData += `- Product: ${row.Product_Name} (Category: ${row.Category}, Unit: ${unit})\n`;
+            contextData += `  Current Price: ${price} UZS per ${unit} (Changed by ${change}% recently).\n`;
             
-            const forecast = forecastData.find(f => f.Product_Name === row.Product_Name);
+            const forecast = forecastData.find(f => f.Product_Name === row.Product_Name && (!f.Unit || f.Unit === unit)) ||
+                             forecastData.find(f => f.Product_Name === row.Product_Name);
             if (forecast) {
-              contextData += `  AI Forecast (${forecast.Forecast_Date}): Expected Median Price ${forecast.Median_Price} UZS (Range: ${forecast.Min_Price} - ${forecast.Max_Price}).\n`;
+              contextData += `  AI Forecast (${forecast.Forecast_Date}): Expected Median Price ${forecast.Median_Price} UZS per ${unit} (Range: ${forecast.Min_Price} - ${forecast.Max_Price}).\n`;
             }
             contextData += "\n";
           });
