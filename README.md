@@ -1,3 +1,4 @@
+# DON'T LOCALHOST THIS PROJECT. MOST OF THE FEATURES DO NOT WORK BECAUSE ALL NECESSARY DATABASE CREDENTIALS AND API KEYS ARE IN GITIGNORE!
 # UZEX Analytics & AI Forecasting Platform
 
 This project automates the extraction, cleaning, and AI-driven forecasting of product prices from UZEX (Uzbekistan Commodity Exchange) weekly bulletins.
