@@ -15,28 +15,33 @@ export default function SettingsPage() {
   } = useCurrency();
 
   const [currency, setCurrency] = useState<Currency>(activeCurrency);
+  const [prevActiveCurrency, setPrevActiveCurrency] = useState<Currency>(activeCurrency);
+
+  if (prevActiveCurrency !== activeCurrency) {
+    setPrevActiveCurrency(activeCurrency);
+    setCurrency(activeCurrency);
+  }
+
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [saveError, setSaveError] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setCurrency(activeCurrency);
-  }, [activeCurrency]);
-
-  useEffect(() => {
-    try {
-      const value = localStorage.getItem("narxnazar-preferences");
-      if (!value) return;
-      const preferences = JSON.parse(value);
-      if (preferences.currency === "USD" || preferences.currency === "UZS") {
-        setCurrency(preferences.currency);
+    queueMicrotask(() => {
+      try {
+        const value = localStorage.getItem("narxnazar-preferences");
+        if (!value) return;
+        const preferences = JSON.parse(value);
+        if (preferences.currency === "USD" || preferences.currency === "UZS") {
+          setCurrency(preferences.currency);
+        }
+        setAutoRefresh(preferences.autoRefresh !== false);
+        setNotifications(preferences.notifications !== false);
+      } catch {
+        /* Default preferences remain available. */
       }
-      setAutoRefresh(preferences.autoRefresh !== false);
-      setNotifications(preferences.notifications !== false);
-    } catch {
-      /* Default preferences remain available. */
-    }
+    });
   }, []);
 
   const handleSave = (e: React.FormEvent) => {

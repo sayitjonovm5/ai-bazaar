@@ -16,10 +16,12 @@ function FilterBarContent() {
   const currentCategory = searchParams.get("category") || "All";
 
   const [searchVal, setSearchVal] = useState(currentQ);
+  const [prevQ, setPrevQ] = useState(currentQ);
 
-  useEffect(() => {
+  if (prevQ !== currentQ) {
+    setPrevQ(currentQ);
     setSearchVal(currentQ);
-  }, [currentQ]);
+  }
 
   const updateFilters = (newQ?: string, newCat?: string) => {
     const params = new URLSearchParams(searchParams.toString());

@@ -79,9 +79,12 @@ export default function SearchPage() {
   }, [session]);
 
   // Reset display count when filters change
-  useEffect(() => {
+  const filterKey = `${searchTerm}|${selectedCategory}|${showSpot}|${showForvard}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (prevFilterKey !== filterKey) {
+    setPrevFilterKey(filterKey);
     setDisplayCount(60);
-  }, [searchTerm, selectedCategory, showSpot, showForvard]);
+  }
 
   const handlePinToggle = async (id: string) => {
     if (!session?.user) {

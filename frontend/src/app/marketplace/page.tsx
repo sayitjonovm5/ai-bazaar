@@ -7,12 +7,19 @@ import MarketplaceFilterBar from "./MarketplaceFilterBar";
 import { formatDate } from "@/lib/market-ui";
 import ConvertedPrice from "@/components/ConvertedPrice";
 import { inferCategoryFromName } from "@/lib/product-categories";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import MarketplaceImage from "@/components/MarketplaceImage";
+import DeleteOfferButton from "@/components/DeleteOfferButton";
 
 export default async function MarketplacePage({
   searchParams,
 }: {
   searchParams: Promise<{ q?: string; category?: string }>;
 }) {
+  const session = await getServerSession(authOptions);
+  const currentUserId = (session?.user as any)?.id;
+
   const resolvedSearchParams = await searchParams;
   const q = resolvedSearchParams?.q?.trim() || "";
   const selectedCategory = resolvedSearchParams?.category || "All";
@@ -98,51 +105,68 @@ export default async function MarketplacePage({
 
       {/* Offers Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filteredOffers.map((offer: any) => (
-          <div
-            key={offer.id}
-            className="group bg-white/75 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:bg-white/90 transition-all duration-200 rounded-2xl flex flex-col overflow-hidden"
-          >
-            {/* Header with Product Icon & Category */}
-            <div className="p-4 border-b border-white/50 flex items-center justify-between bg-white/40 backdrop-blur-sm">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <ProductIcon name={offer.productName} size="sm" />
-                <div className="min-w-0">
-                  <span className="font-semibold text-sm text-slate-800 truncate block">
-                    {offer.productName}
-                  </span>
-                  <span className="text-[10px] text-blue-600 font-medium bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200/60 inline-block">
-                    {offer.category}
-                  </span>
+        {filteredOffers.map((offer: any) => {
+          const isOwner = Boolean(currentUserId && offer.userId === currentUserId);
+
+          return (
+            <div
+              key={offer.id}
+              className={`group bg-white/75 backdrop-blur-xl border ${
+                isOwner ? "border-blue-300/80 shadow-[0_8px_30px_rgb(59,130,246,0.08)] ring-1 ring-blue-500/20" : "border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+              } hover:shadow-lg hover:bg-white/90 transition-all duration-200 rounded-2xl flex flex-col overflow-hidden relative`}
+            >
+              {/* Header with Product Icon, Category & Actions */}
+              <div className="p-4 border-b border-white/50 flex items-center justify-between bg-white/40 backdrop-blur-sm gap-2">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <ProductIcon name={offer.productName} size="sm" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-sm text-slate-800 truncate block">
+                        {offer.productName}
+                      </span>
+                      {isOwner && (
+                        <span className="text-[9px] uppercase tracking-wider font-bold bg-amber-100/90 text-amber-800 border border-amber-300/80 px-1.5 py-0.5 rounded-md shrink-0 shadow-2xs">
+                          Sizniki
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] text-blue-600 font-medium bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200/60 inline-block">
+                      {offer.category}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  <Link
+                    href={`/product/${encodeURIComponent(offer.productName)}`}
+                    className="text-xs text-blue-600 font-medium hover:underline flex items-center"
+                  >
+                    Tahlil <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
+                  </Link>
+
+                  {/* Delete button only visible to the owner */}
+                  {isOwner && (
+                    <DeleteOfferButton
+                      offerId={offer.id}
+                      productName={offer.productName}
+                    />
+                  )}
                 </div>
               </div>
-              <Link
-                href={`/product/${encodeURIComponent(offer.productName)}`}
-                className="text-xs text-blue-600 font-medium hover:underline shrink-0 ml-2 flex items-center"
-              >
-                Tahlil <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
-              </Link>
-            </div>
 
-            {/* Product Image or Graphic */}
-            {offer.imageUrl ? (
-              <div className="w-full h-44 bg-slate-100/60 relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              {/* Product Image with multi-layer fallback & online support */}
+              <div className="w-full h-44 bg-slate-100/60 relative overflow-hidden group/img">
+                <MarketplaceImage
                   src={offer.imageUrl}
-                  alt={offer.companyName}
+                  productName={offer.productName}
+                  category={offer.category}
+                  alt={offer.productName || offer.companyName}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
+                <div className="absolute top-2.5 left-2.5 bg-black/50 backdrop-blur-md px-2 py-0.5 rounded-lg text-[10px] font-semibold text-white tracking-wide border border-white/20">
+                  {offer.category}
+                </div>
               </div>
-            ) : (
-              <div className="w-full h-32 bg-gradient-to-br from-white/40 to-slate-100/60 flex items-center justify-center">
-                <ProductIcon
-                  name={offer.productName}
-                  size="xl"
-                  showCategoryHint={false}
-                />
-              </div>
-            )}
 
             {/* Offer Body */}
             <div className="p-5 flex-1 flex flex-col">
@@ -206,7 +230,8 @@ export default async function MarketplacePage({
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty State */}

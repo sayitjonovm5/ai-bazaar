@@ -64,7 +64,9 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    syncFromStorage();
+    queueMicrotask(() => {
+      syncFromStorage();
+    });
 
     const handleCustomChange = (e: Event) => {
       const customEvent = e as CustomEvent<Currency>;

@@ -17,10 +17,56 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const { data: session } = useSession();
 
+  const calculateMarketIndex = (products: any[]) => {
+    const dateMap = new Map();
+    
+    products.forEach(product => {
+      if (!product.chartData || product.chartData.length === 0) return;
+      
+      // Find baseline price (first historical data point)
+      const baselinePoint = product.chartData.find((d: any) => d.historical !== undefined);
+      const baselinePrice = baselinePoint?.historical || 1; // avoid div by 0
+      
+      product.chartData.forEach((point: any) => {
+        const existing = dateMap.get(point.date) || { sumIndexHistorical: 0, sumIndexForecast: 0, countHistorical: 0, countForecast: 0 };
+        
+        if (point.historical !== undefined) {
+          existing.sumIndexHistorical += (point.historical / baselinePrice) * 100;
+          existing.countHistorical += 1;
+        }
+        if (point.forecastMedian !== undefined) {
+          existing.sumIndexForecast += (point.forecastMedian / baselinePrice) * 100;
+          existing.countForecast += 1;
+        }
+        
+        dateMap.set(point.date, existing);
+      });
+    });
+
+    const sortedDates = Array.from(dateMap.keys()).sort();
+    
+    const indexData = sortedDates.map(date => {
+      const data = dateMap.get(date);
+      // Format date for chart
+      const d = new Date(date);
+      const formattedDate = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
+      
+      return {
+        date: formattedDate,
+        historicalIndex: data.countHistorical > 0 ? parseFloat((data.sumIndexHistorical / data.countHistorical).toFixed(2)) : undefined,
+        forecastIndex: data.countForecast > 0 ? parseFloat((data.sumIndexForecast / data.countForecast).toFixed(2)) : undefined,
+      };
+    });
+
+    setMarketIndexData(indexData);
+  };
+
   useEffect(() => {
     if (!session?.user) {
-      setPinnedProducts([]);
-      setIsLoading(false);
+      queueMicrotask(() => {
+        setPinnedProducts([]);
+        setIsLoading(false);
+      });
       return;
     }
 
@@ -66,50 +112,6 @@ export default function Dashboard() {
       setIsLoading(false);
     });
   }, [session]);
-
-  const calculateMarketIndex = (products: any[]) => {
-    const dateMap = new Map();
-    
-    products.forEach(product => {
-      if (!product.chartData || product.chartData.length === 0) return;
-      
-      // Find baseline price (first historical data point)
-      const baselinePoint = product.chartData.find((d: any) => d.historical !== undefined);
-      const baselinePrice = baselinePoint?.historical || 1; // avoid div by 0
-      
-      product.chartData.forEach((point: any) => {
-        const existing = dateMap.get(point.date) || { sumIndexHistorical: 0, sumIndexForecast: 0, countHistorical: 0, countForecast: 0 };
-        
-        if (point.historical !== undefined) {
-          existing.sumIndexHistorical += (point.historical / baselinePrice) * 100;
-          existing.countHistorical += 1;
-        }
-        if (point.forecastMedian !== undefined) {
-          existing.sumIndexForecast += (point.forecastMedian / baselinePrice) * 100;
-          existing.countForecast += 1;
-        }
-        
-        dateMap.set(point.date, existing);
-      });
-    });
-
-    const sortedDates = Array.from(dateMap.keys()).sort();
-    
-    const indexData = sortedDates.map(date => {
-      const data = dateMap.get(date);
-      // Format date for chart
-      const d = new Date(date);
-      const formattedDate = `${d.toLocaleString('en-US', { month: 'short' })} ${d.getDate()}`;
-      
-      return {
-        date: formattedDate,
-        historicalIndex: data.countHistorical > 0 ? parseFloat((data.sumIndexHistorical / data.countHistorical).toFixed(2)) : undefined,
-        forecastIndex: data.countForecast > 0 ? parseFloat((data.sumIndexForecast / data.countForecast).toFixed(2)) : undefined,
-      };
-    });
-
-    setMarketIndexData(indexData);
-  };
 
   const handleUnpin = async (id: string) => {
     if (!session?.user) return;

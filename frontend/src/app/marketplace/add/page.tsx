@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useCurrency } from "@/lib/currency-context";
 import { MARKETPLACE_CATEGORIES, inferCategoryFromName } from "@/lib/product-categories";
+import { getProductLocalImage } from "@/lib/marketplace-images";
 
 interface LiteProduct {
   name: string;
@@ -139,12 +140,20 @@ export default function AddOfferPage() {
     setError("");
     setIsSubmitting(true);
     try {
+      const finalImageUrl =
+        formData.imageUrl ||
+        getProductLocalImage(formData.productName, selectedCategory);
+
       const res = await fetch(
         `/api/product/${encodeURIComponent(formData.productName)}/suppliers`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...formData, name: formData.companyName }),
+          body: JSON.stringify({
+            ...formData,
+            imageUrl: finalImageUrl,
+            name: formData.companyName,
+          }),
         },
       );
 
@@ -454,16 +463,35 @@ export default function AddOfferPage() {
               }}
               className="w-full p-2 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 text-slate-900 transition-all shadow-2xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            {formData.imageUrl && (
-              <div className="mt-3 w-32 h-32 rounded-xl border border-slate-200 overflow-hidden relative shadow-2xs">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={formData.imageUrl}
-                  alt="Uploaded"
-                  className="w-full h-full object-cover"
-                />
+            {formData.imageUrl ? (
+              <div className="mt-3 flex items-center gap-3">
+                <div className="w-28 h-28 rounded-xl border border-white/70 overflow-hidden relative shadow-2xs bg-slate-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={formData.imageUrl}
+                    alt="Uploaded"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-xs text-emerald-600 font-medium bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                  Maxsus rasm yuklandi
+                </div>
               </div>
-            )}
+            ) : formData.productName ? (
+              <div className="mt-3 flex items-center gap-3">
+                <div className="w-28 h-28 rounded-xl border border-white/70 overflow-hidden relative shadow-2xs bg-slate-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getProductLocalImage(formData.productName, selectedCategory)}
+                    alt="Default preview"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="text-xs text-slate-500 font-medium">
+                  Standart tovar rasmi tanlandi. O'zingiz yangi rasm yuklashingiz ham mumkin.
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="border-t border-white/60 pt-6">
