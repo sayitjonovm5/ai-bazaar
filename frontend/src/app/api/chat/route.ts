@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import Papa from "papaparse";
+import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -75,6 +76,28 @@ export async function POST(req: Request) {
             if (forecast) {
               contextData += `  AI Forecast (${forecast.Forecast_Date}): Expected Median Price ${forecast.Median_Price} UZS per ${unit} (Range: ${forecast.Min_Price} - ${forecast.Max_Price}).\n`;
             }
+            contextData += "\n";
+          });
+        }
+      }
+
+      // 3. Try to attach Marketplace Offers
+      if (words.length > 0) {
+        const orConditions = words.map((w: string) => ({ productName: { contains: w } }));
+        const offers = await prisma.supplierOffer.findMany({
+          where: { OR: orConditions },
+          take: 5,
+          orderBy: { createdAt: "desc" }
+        });
+
+        if (offers.length > 0) {
+          if (!contextData) contextData = "Here is the most relevant market data based on the user's query:\n\n";
+          contextData += "Active B2B Marketplace Offers:\n";
+          offers.forEach((offer: any) => {
+            contextData += `- Supplier: ${offer.companyName} is offering ${offer.productName}\n`;
+            contextData += `  Price: ${offer.price} UZS\n`;
+            if (offer.description) contextData += `  Description: ${offer.description}\n`;
+            if (offer.phoneNumber || offer.contact) contextData += `  Contact: ${offer.phoneNumber || offer.contact}\n`;
             contextData += "\n";
           });
         }
