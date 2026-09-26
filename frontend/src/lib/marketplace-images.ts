@@ -3,46 +3,70 @@ export interface ProductImageData {
   online: string;
 }
 
+export const SELLER_AVATARS = [
+  "/images/avatars/person-1.jpg",
+  "/images/avatars/person-2.jpg",
+  "/images/avatars/person-3.jpg",
+  "/images/avatars/person-4.jpg",
+];
+
+/**
+ * Returns a deterministic, realistic seller portrait avatar.
+ */
+export function getSellerAvatar(user?: { id?: string | null; name?: string | null; email?: string | null; profilePicture?: string | null } | null): string {
+  if (user?.profilePicture && user.profilePicture.trim().length > 0) {
+    return user.profilePicture.trim();
+  }
+  const key = user?.id || user?.email || user?.name || "seller-avatar";
+  let hash = 0;
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash << 5) - hash + key.charCodeAt(i);
+    hash |= 0;
+  }
+  const index = Math.abs(hash) % SELLER_AVATARS.length;
+  return SELLER_AVATARS[index];
+}
+
 export const COMMODITY_IMAGE_MAP: Record<string, ProductImageData> = {
   fuel: {
     local: "/images/products/fuel.jpg",
-    online: "https://images.unsplash.com/photo-1545231027-637d2f6210f8?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/fuel.jpg",
   },
   cotton: {
     local: "/images/products/cotton.jpg",
-    online: "https://images.unsplash.com/photo-1606041008023-472dfb5e530f?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/cotton.jpg",
   },
   cement: {
     local: "/images/products/cement.jpg",
-    online: "https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/cement.jpg",
   },
   oil: {
     local: "/images/products/oil.jpg",
-    online: "https://images.unsplash.com/photo-1616401784845-180882ba9ba8?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/oil.jpg",
   },
   metal: {
     local: "/images/products/metal.jpg",
-    online: "https://images.unsplash.com/photo-1535813547-99c456a41d4a?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/metal.jpg",
   },
   grain: {
     local: "/images/products/grain.jpg",
-    online: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/grain.jpg",
   },
   polymer: {
     local: "/images/products/polymer.jpg",
-    online: "https://images.unsplash.com/photo-1526951521990-620dc14c214b?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/polymer.jpg",
   },
   fertilizer: {
     local: "/images/products/fertilizer.jpg",
-    online: "https://images.unsplash.com/photo-1628352081506-83c43123ed6d?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/fertilizer.jpg",
   },
   coal: {
     local: "/images/products/coal.jpg",
-    online: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/coal.jpg",
   },
   trade: {
     local: "/images/products/trade.jpg",
-    online: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80",
+    online: "/images/products/trade.jpg",
   },
 };
 

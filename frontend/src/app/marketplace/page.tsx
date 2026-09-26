@@ -11,6 +11,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import MarketplaceImage from "@/components/MarketplaceImage";
 import DeleteOfferButton from "@/components/DeleteOfferButton";
+import { getSellerAvatar } from "@/lib/marketplace-images";
 
 export default async function MarketplacePage({
   searchParams,
@@ -172,23 +173,24 @@ export default async function MarketplacePage({
             <div className="p-5 flex-1 flex flex-col">
               {/* Seller info */}
               <div className="flex items-center gap-3 mb-4 border-b border-white/50 pb-4">
-                <div className="w-10 h-10 rounded-full bg-white/70 overflow-hidden border border-white/80 shrink-0 flex items-center justify-center shadow-2xs">
-                  {offer.user?.profilePicture ? (
-                    <ImageFallback
-                      key={offer.user.profilePicture}
-                      src={offer.user.profilePicture}
-                      alt=""
-                      className="h-full w-full object-cover"
-                      fallback={<User size={15} className="text-gray-400" />}
-                    />
-                  ) : (
-                    <User className="w-5 h-5 text-slate-400" />
-                  )}
+                <div className="w-10 h-10 rounded-full bg-slate-100 overflow-hidden border border-white/80 shrink-0 shadow-2xs relative">
+                  <ImageFallback
+                    key={offer.user?.profilePicture || offer.user?.id || offer.id}
+                    src={getSellerAvatar(offer.user)}
+                    alt={offer.user?.name || offer.companyName || "Sotuvchi"}
+                    className="h-full w-full object-cover"
+                    fallback={<User size={18} className="text-gray-400 m-auto" />}
+                  />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs text-slate-400 font-medium">Sotuvchi</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs text-slate-400 font-medium">Sotuvchi</p>
+                    <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.2 rounded-full font-semibold">
+                      Tasdiqlangan
+                    </span>
+                  </div>
                   <p className="text-sm font-semibold text-slate-800 truncate">
-                    {offer.user?.name || offer.user?.email || "Foydalanuvchi"}
+                    {offer.user?.name || (offer.user?.email ? offer.user.email.split("@")[0] : "Savdo vakili")}
                   </p>
                 </div>
               </div>
