@@ -24,9 +24,9 @@ export default function SettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Market Preferences */}
-        <div className="glass-card rounded-3xl p-6 sm:p-7">
+        <div className="bg-white/75 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-blue-500/15 text-blue-600 rounded-xl border border-blue-500/25 shadow-xs">
+            <div className="p-2.5 bg-blue-500/10 text-blue-600 rounded-xl border border-blue-500/20">
               <Database className="w-5 h-5" />
             </div>
             <div>
@@ -41,7 +41,7 @@ export default function SettingsPage() {
               <select
                 value={currency}
                 onChange={(e) => setCurrency(e.target.value)}
-                className="w-full max-w-xs px-4 py-2.5 glass-input rounded-xl text-sm text-slate-800 focus:outline-none"
+                className="w-full max-w-xs px-3.5 py-2.5 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl text-sm text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 shadow-2xs"
               >
                 <option value="UZS">UZS (O'zbek so'mi)</option>
                 <option value="USD">USD (AQSh dollari)</option>
@@ -57,16 +57,16 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={autoRefresh}
                 onChange={(e) => setAutoRefresh(e.target.checked)}
-                className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+                className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
               />
             </div>
           </div>
         </div>
 
         {/* Notifications */}
-        <div className="glass-card rounded-3xl p-6 sm:p-7">
+        <div className="bg-white/75 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="flex items-center gap-3 mb-6">
-            <div className="p-2.5 bg-emerald-500/15 text-emerald-600 rounded-xl border border-emerald-500/25 shadow-xs">
+            <div className="p-2.5 bg-emerald-500/10 text-emerald-600 rounded-xl border border-emerald-500/20">
               <Bell className="w-5 h-5" />
             </div>
             <div>
@@ -84,15 +84,15 @@ export default function SettingsPage() {
               type="checkbox"
               checked={notifications}
               onChange={(e) => setNotifications(e.target.checked)}
-              className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500 cursor-pointer"
+              className="h-4 w-4 text-blue-600 rounded border-slate-300 focus:ring-blue-500"
             />
           </div>
         </div>
 
         {/* Platform Info */}
-        <div className="glass-card rounded-3xl p-6 sm:p-7">
+        <div className="bg-white/75 backdrop-blur-xl rounded-3xl p-6 border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2.5 bg-purple-500/15 text-purple-600 rounded-xl border border-purple-500/25 shadow-xs">
+            <div className="p-2.5 bg-purple-500/10 text-purple-600 rounded-xl border border-purple-500/20">
               <Shield className="w-5 h-5" />
             </div>
             <div>
@@ -100,17 +100,17 @@ export default function SettingsPage() {
               <p className="text-sm text-slate-500">UZEX haftalik byulleteni va Chronos AI prognozlari</p>
             </div>
           </div>
-          <div className="text-sm text-slate-600 space-y-1.5">
+          <div className="text-sm text-slate-600 space-y-1">
             <p><span className="font-semibold text-slate-700">Ma'lumot manbai:</span> UZEX tovar-xom ashyo birjasi arxivlari</p>
             <p><span className="font-semibold text-slate-700">AI modeli:</span> Amazon Chronos (T5-Mini zero-shot forecaster)</p>
             <p><span className="font-semibold text-slate-700">Versiya:</span> 1.0.0 (Xakaton versiyasi)</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 pt-2">
+        <div className="flex items-center gap-4">
           <button
             type="submit"
-            className="flex items-center gap-2 px-6 py-3.5 glass-btn-blue text-white rounded-xl font-bold transition-all cursor-pointer shadow-md"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600/90 text-white rounded-xl font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-600/20 backdrop-blur-md"
           >
             <Save className="w-4 h-4" />
             Sozlamalarni saqlash

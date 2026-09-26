@@ -67,7 +67,7 @@ export default function ChatPage() {
         <p className="text-slate-500 mt-1">Ma'lumotlar va prognozlar haqida savollar bering</p>
       </div>
 
-      <div className="flex-1 glass-panel rounded-3xl flex flex-col overflow-hidden shadow-2xl">
+      <div className="flex-1 bg-white/75 backdrop-blur-2xl rounded-3xl shadow-sm border border-white/60 flex flex-col overflow-hidden">
         {/* Chat History */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((msg) => (
@@ -75,7 +75,7 @@ export default function ChatPage() {
               <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${msg.role === "user" ? "bg-blue-500/15 border-blue-500/25 text-blue-700" : "bg-emerald-500/15 border-emerald-500/25 text-emerald-700"}`}>
                 {msg.role === "user" ? <User size={20} /> : <Bot size={20} />}
               </div>
-              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "glass-btn-blue text-white rounded-tr-none shadow-md" : "glass-card text-slate-800 rounded-tl-none whitespace-pre-wrap shadow-xs"}`}>
+              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "bg-blue-600/90 text-white backdrop-blur-md rounded-tr-none shadow-md shadow-blue-600/20" : "bg-white/80 backdrop-blur-md border border-white/70 text-slate-800 rounded-tl-none whitespace-pre-wrap shadow-2xs"}`}>
                 {msg.content}
               </div>
             </div>
@@ -143,20 +143,20 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Input */}
-        <div className="p-4 bg-white/30 backdrop-blur-md border-t border-white/50">
+        <div className="p-4 bg-white/40 backdrop-blur-md border-t border-white/50">
           <form onSubmit={handleSend} className="relative flex items-center">
             <input
               type="text"
               disabled={isLoading}
               placeholder="Narx tendensiyalari haqida so'rang, masalan: 'Sement narxi nega bugun oshdi?'"
-              className="w-full pl-6 pr-14 py-4 glass-input rounded-full text-slate-900 placeholder-slate-400 focus:outline-none disabled:opacity-50 transition-all text-sm"
+              className="w-full pl-6 pr-14 py-4 bg-white/65 backdrop-blur-xl border border-white/70 rounded-full text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 shadow-2xs disabled:opacity-50 transition-all text-sm"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
             <button
               type="submit"
               disabled={isLoading}
-              className="absolute right-2 p-2.5 glass-btn-blue text-white rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="absolute right-2 p-2.5 bg-blue-600/90 text-white rounded-full hover:bg-blue-600 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={18} />
             </button>

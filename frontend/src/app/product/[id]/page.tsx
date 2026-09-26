@@ -115,12 +115,12 @@ export default function ProductDetailsPage() {
           <p className="font-medium text-sm">{toastMessage}</p>
         </div>
       )}
-      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 glass-panel p-6 rounded-3xl">
+      <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/70 backdrop-blur-2xl p-6 rounded-2xl border border-white/60 shadow-xs">
         <div className="flex items-center space-x-4">
           <ProductIcon name={cleanName} size="xl" showCategoryHint={true} />
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{cleanName}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-slate-900">{cleanName}</h1>
               <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                 isForward 
                   ? 'bg-purple-500/15 text-purple-700 border-purple-500/25'
@@ -134,7 +134,7 @@ export default function ProductDetailsPage() {
         </div>
         <Link 
           href="/search" 
-          className="inline-flex items-center gap-2 self-start md:self-center px-4 py-2 glass-pill hover:bg-white/80 text-slate-700 rounded-full text-sm font-semibold transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 self-start md:self-center px-4 py-2 bg-white/60 hover:bg-white/90 text-slate-700 rounded-xl text-sm font-semibold transition-all border border-white/70 backdrop-blur-md shadow-2xs"
         >
           <ArrowLeft className="w-4 h-4" />
           Barcha mahsulotlar
@@ -144,7 +144,7 @@ export default function ProductDetailsPage() {
       <div className="flex flex-1 flex-col lg:flex-row gap-8 min-h-0">
         {/* Left Side: Product Forecast & Analysis & Table */}
         <div className="flex-1 overflow-y-auto pr-0 lg:pr-4 flex flex-col gap-6">
-          <div className="glass-card rounded-3xl p-6 sm:p-7">
+          <div className="bg-white/75 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Tarixiy narxlar va kelgusi hafta prognozi</h2>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -162,9 +162,9 @@ export default function ProductDetailsPage() {
                     contentStyle={{ 
                       borderRadius: '16px', 
                       background: 'rgba(255, 255, 255, 0.95)', 
-                      backdropFilter: 'blur(16px)', 
-                      border: '1px solid rgba(255, 255, 255, 0.9)', 
-                      boxShadow: '0 12px 30px rgba(0, 0, 0, 0.08)' 
+                      backdropFilter: 'blur(12px)', 
+                      border: '1px solid rgba(255, 255, 255, 0.8)', 
+                      boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)' 
                     }}
                     formatter={(value: any, name: any) => {
                       if (Array.isArray(value)) return [`${value[0].toLocaleString()} - ${value[1].toLocaleString()}`, 'Prognoz oraliq (Min-Max)'];
@@ -202,11 +202,11 @@ export default function ProductDetailsPage() {
           </div>
 
           {/* Raw Data Table Section */}
-          <div className="glass-card rounded-3xl p-6 sm:p-7 flex-1">
+          <div className="bg-white/75 backdrop-blur-xl p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 flex-1">
             <h2 className="text-xl font-bold text-slate-900 mb-4">Tarixiy ma'lumotlar jadvallari (Xom ashyo)</h2>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm text-left text-slate-600">
-                <thead className="text-xs text-slate-700 uppercase bg-white/40 backdrop-blur-md border-b border-white/60">
+                <thead className="text-xs text-slate-700 uppercase bg-white/50 backdrop-blur-sm border-b border-white/60">
                   <tr>
                     <th className="px-4 py-3">Sana (Date)</th>
                     <th className="px-4 py-3">Kategoriya</th>
