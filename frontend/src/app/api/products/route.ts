@@ -18,7 +18,8 @@ export async function GET() {
     const productMap = new Map();
 
     records.forEach((row: any) => {
-      const priceStr = row.Average_Price ? row.Average_Price.replace(/,/g, "") : "";
+      const priceRaw = row.Current_Price_Sum || row.Average_Price || "";
+      const priceStr = String(priceRaw).replace(/[\s,]/g, "");
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       

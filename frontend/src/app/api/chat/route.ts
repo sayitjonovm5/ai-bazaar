@@ -99,11 +99,15 @@ export async function POST(req: Request) {
       fetchHeaders["Authorization"] = `Bearer ${GROQ_API_KEY}`;
     }
 
+    const effectiveModel = (GROQ_API_KEY && (OLLAMA_MODEL === "llama-3.1-70b-versatile" || !OLLAMA_MODEL))
+      ? "openai/gpt-oss-20b"
+      : OLLAMA_MODEL;
+
     const response = await fetch(chatUrl, {
       method: "POST",
       headers: fetchHeaders,
       body: JSON.stringify({
-        model: OLLAMA_MODEL,
+        model: effectiveModel,
         messages: [
           { role: "system", content: systemContent },
           { role: "user", content: message }
