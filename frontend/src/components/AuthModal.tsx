@@ -96,7 +96,6 @@ export function AuthCard({
   isModal?: boolean;
 }) {
   const [tab, setTab] = useState<"signin" | "signup">(initialMode);
-  const [viewState, setViewState] = useState<"form" | "google_picker">("form");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -104,26 +103,6 @@ export function AuthCard({
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
-
-  // Custom Google account form state
-  const [showCustomGoogleInput, setShowCustomGoogleInput] = useState(false);
-  const [customGoogleName, setCustomGoogleName] = useState("");
-  const [customGoogleEmail, setCustomGoogleEmail] = useState("");
-
-  const presetGoogleAccounts = [
-    {
-      name: "Asliddin Abdurahimov",
-      email: "asliddinabdurahimov20@gmail.com",
-      image: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80",
-      role: "BUYER",
-    },
-    {
-      name: "NarxNazar Tadbirkor",
-      email: "tadbirkor.b2b@gmail.com",
-      image: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=120&q=80",
-      role: "SUPPLIER",
-    },
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -169,71 +148,7 @@ export function AuthCard({
 
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
-    try {
-      // Check if real Google credentials are configured in .env
-      const checkRes = await fetch("/api/auth/google-status");
-      const checkData = await checkRes.json();
-
-      if (checkData.configured) {
-        await signIn("google", { callbackUrl: window.location.href });
-        return;
-      }
-
-      // If not configured with Google Cloud API keys yet, open Smart Google Account Picker
-      setIsGoogleLoading(false);
-      setViewState("google_picker");
-    } catch {
-      // Fallback to Smart Google Account Picker
-      setIsGoogleLoading(false);
-      setViewState("google_picker");
-    }
-  };
-
-  const executeSmartGoogleLogin = async (account: {
-    name: string;
-    email: string;
-    image?: string;
-    role?: string;
-  }) => {
-    setIsGoogleLoading(true);
-    try {
-      const res = await signIn("credentials", {
-        redirect: false,
-        email: account.email.trim().toLowerCase(),
-        name: account.name,
-        image: account.image,
-        role: account.role || "BUYER",
-        isGoogleAuth: "true",
-      });
-
-      if (res?.error) {
-        toast.error(res.error);
-        setIsGoogleLoading(false);
-      } else {
-        toast.success(`Google hisobingiz (${account.email}) orqali muvaffaqiyatli kirdingiz!`);
-        if (onSuccess) onSuccess();
-        window.location.reload();
-      }
-    } catch {
-      toast.error("Google orqali kirishda xatolik yuz berdi.");
-      setIsGoogleLoading(false);
-    }
-  };
-
-  const handleCustomGoogleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!customGoogleEmail || !customGoogleName) {
-      toast.error("Iltimos, ism va Gmail manzilingizni kiriting.");
-      return;
-    }
-    const cleanEmail = customGoogleEmail.trim().toLowerCase();
-    const finalEmail = cleanEmail.includes("@") ? cleanEmail : `${cleanEmail}@gmail.com`;
-
-    executeSmartGoogleLogin({
-      name: customGoogleName.trim(),
-      email: finalEmail,
-      image: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(customGoogleName)}&backgroundColor=2563eb,3b82f6,1d4ed8`,
-    });
+    await signIn("google", { callbackUrl: window.location.href });
   };
 
   const handleDemoLogin = async () => {
@@ -268,136 +183,10 @@ export function AuthCard({
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-blue-500/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none" />
 
-        {/* VIEW 1: Smart Google Account Picker */}
-        {viewState === "google_picker" ? (
-          <div className="relative">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
-              <button
-                type="button"
-                onClick={() => setViewState("form")}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Orqaga</span>
-              </button>
-              <div className="flex items-center gap-1.5">
-                <GoogleIcon className="w-4 h-4" />
-                <span className="text-xs font-bold text-slate-700">Google bilan kirish</span>
-              </div>
-            </div>
-
-            <div className="text-center mb-5">
-              <h3 className="text-lg font-bold text-slate-900">Hisobni tanlang</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                <span className="font-semibold text-slate-700">NarxNazar</span> ilovasi bilan davom etish uchun
-              </p>
-            </div>
-
-            {/* List of accounts */}
-            <div className="space-y-2 mb-4">
-              {presetGoogleAccounts.map((acc) => (
-                <button
-                  key={acc.email}
-                  type="button"
-                  disabled={isGoogleLoading}
-                  onClick={() => executeSmartGoogleLogin(acc)}
-                  className="w-full flex items-center gap-3.5 p-3 rounded-2xl border border-slate-200/80 bg-white/80 hover:bg-blue-50/60 hover:border-blue-300 transition-all text-left cursor-pointer group disabled:opacity-50 shadow-2xs"
-                >
-                  <div className="relative w-10 h-10 rounded-full overflow-hidden shrink-0 border border-slate-200 shadow-2xs">
-                    <img
-                      src={acc.image}
-                      alt={acc.name}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-0 right-0 p-0.5 bg-white rounded-full shadow-2xs">
-                      <GoogleIcon className="w-2.5 h-2.5" />
-                    </div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-900 group-hover:text-blue-600 truncate transition-colors">
-                      {acc.name}
-                    </p>
-                    <p className="text-[11px] text-slate-500 truncate font-medium">
-                      {acc.email}
-                    </p>
-                  </div>
-                  <CheckCircle2 className="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-colors shrink-0" />
-                </button>
-              ))}
-
-              {/* Add / Type another Google account */}
-              {!showCustomGoogleInput ? (
-                <button
-                  type="button"
-                  onClick={() => setShowCustomGoogleInput(true)}
-                  className="w-full flex items-center gap-3.5 p-3 rounded-2xl border border-dashed border-slate-300 hover:border-blue-400 bg-white/50 hover:bg-blue-50/40 text-left transition-all cursor-pointer group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors shrink-0">
-                    <UserPlus className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-700 group-hover:text-blue-600">
-                      Boshqa Google hisob bilan kirish
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      O'z Gmail manzilingizni kiriting
-                    </p>
-                  </div>
-                </button>
-              ) : (
-                <form
-                  onSubmit={handleCustomGoogleSubmit}
-                  className="p-3.5 rounded-2xl border border-blue-200 bg-blue-50/40 space-y-2.5 animate-in fade-in duration-150"
-                >
-                  <p className="text-xs font-bold text-slate-800">
-                    O'zingizning Google profilingizni kiriting:
-                  </p>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Ismingiz (masalan: Asliddin)"
-                    value={customGoogleName}
-                    onChange={(e) => setCustomGoogleName(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 outline-none focus:border-blue-500"
-                  />
-                  <input
-                    type="email"
-                    required
-                    placeholder="Gmail manzilingiz (masalan: siz@gmail.com)"
-                    value={customGoogleEmail}
-                    onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs text-slate-900 outline-none focus:border-blue-500"
-                  />
-                  <div className="flex gap-2 pt-1">
-                    <button
-                      type="submit"
-                      disabled={isGoogleLoading}
-                      className="flex-1 py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      {isGoogleLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <GoogleIcon className="w-3.5 h-3.5" />}
-                      <span>Ushbu hisob bilan kirish</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCustomGoogleInput(false)}
-                      className="py-2 px-3 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
-                    >
-                      Bekor qilish
-                    </button>
-                  </div>
-                </form>
-              )}
-            </div>
-
-            <p className="text-[10px] text-center text-slate-400 mt-3">
-              Davom etish orqali siz NarxNazar xizmat ko'rsatish shartlariga rozilik bildirasiz.
-            </p>
-          </div>
-        ) : (
-          /* VIEW 2: Standard Login/Register Form */
-          <div className="relative">
-            {/* Brand header */}
-            <div className="relative text-center mb-6">
+        {/* VIEW 2: Standard Login/Register Form */}
+        <div className="relative">
+          {/* Brand header */}
+          <div className="relative text-center mb-6">
               <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 shadow-md shadow-blue-500/25 p-2 mb-3">
                 <Image
                   src="/logo.png"
@@ -592,7 +381,6 @@ export function AuthCard({
               </button>
             </div>
           </div>
-        )}
       </div>
     </div>
   );

@@ -49,7 +49,7 @@ export default function LandingFooter() {
               </li>
               <li>
                 <Link href="/search" className="hover:text-white transition-colors">
-                  24,000+ Tovar qidiruvi
+                  10,000+ Tovar qidiruvi
                 </Link>
               </li>
               <li>

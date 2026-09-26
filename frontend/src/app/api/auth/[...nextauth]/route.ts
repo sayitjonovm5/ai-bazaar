@@ -38,51 +38,6 @@ export const authOptions: NextAuthOptions = {
           ? credentials.role
           : "BUYER";
 
-        // Smart Google Auth flow
-        if (credentials.isGoogleAuth === "true") {
-          let user = existingUser;
-          const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}&backgroundColor=2563eb,3b82f6,1d4ed8`;
-          const avatarUrl = credentials.image || defaultAvatar;
-
-          if (!user) {
-            user = await prisma.user.create({
-              data: {
-                email,
-                name: cleanName,
-                provider: "google",
-                profilePicture: avatarUrl,
-                role: cleanRole,
-              },
-            });
-          } else {
-            // Update profile info if placeholder or missing
-            const dataToUpdate: any = {};
-            if ((!user.name || user.name === "undefined") && cleanName) {
-              dataToUpdate.name = cleanName;
-            }
-            if ((!user.role || user.role === "undefined") && cleanRole) {
-              dataToUpdate.role = cleanRole;
-            }
-            if (!user.profilePicture && avatarUrl) {
-              dataToUpdate.profilePicture = avatarUrl;
-            }
-            if (Object.keys(dataToUpdate).length > 0) {
-              user = await prisma.user.update({
-                where: { id: user.id },
-                data: dataToUpdate,
-              });
-            }
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-            image: user.profilePicture || avatarUrl,
-          };
-        }
-
         // Registration flow
         if (credentials.isRegister === "true") {
           if (existingUser) {
@@ -117,24 +72,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!existingUser) {
-          // Auto-provision prototype user with fallback if not found
-          const hashedPassword = await bcrypt.hash(credentials.password, 10);
-          const newUser = await prisma.user.create({
-            data: {
-              email,
-              name: cleanName,
-              password: hashedPassword,
-              role: cleanRole,
-              provider: "credentials",
-            },
-          });
-          return {
-            id: newUser.id,
-            email: newUser.email,
-            name: newUser.name,
-            role: newUser.role,
-            image: newUser.profilePicture,
-          };
+          throw new Error("Bunday email bilan akkaunt topilmadi. Iltimos, oldin ro'yxatdan o'ting.");
         }
 
         if (existingUser.password) {

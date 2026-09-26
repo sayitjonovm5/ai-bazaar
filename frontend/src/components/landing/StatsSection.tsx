@@ -5,14 +5,14 @@ import { BarChart3, Database, Cpu, Zap } from "lucide-react";
 const stats = [
   {
     icon: Database,
-    value: "24,000+",
+    value: "10,000+",
     label: "Tovar turlari",
     description: "UZEX ning barcha faol xom-ashyo va sanoat mahsulotlari",
     accent: "text-blue-600 bg-blue-50 border-blue-100",
   },
   {
     icon: BarChart3,
-    value: "24,000,000+",
+    value: "188,000+",
     label: "Qayta ishlangan ma'lumotlar",
     description: "5+ yillik arxiv haftalik byulletenlari tahlili",
     accent: "text-indigo-600 bg-indigo-50 border-indigo-100",

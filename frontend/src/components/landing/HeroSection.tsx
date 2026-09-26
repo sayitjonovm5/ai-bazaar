@@ -61,7 +61,7 @@ export default function HeroSection() {
 
           {/* Subtitle (Previous Content in Crisp Soft White) */}
           <p className="text-lg sm:text-xl text-white/95 font-medium max-w-2xl mx-auto leading-relaxed mb-10 drop-shadow-[0_1px_6px_rgba(30,58,138,0.25)]">
-            UZEX tovar-xom ashyo birjasidagi 24,000+ mahsulot bo'yicha real-vaqt tahlili, 
+            UZEX tovar-xom ashyo birjasidagi 10,000+ mahsulot bo'yicha real-vaqt tahlili, 
             haftalik dinamika va Amazon Chronos sun'iy intellekt narx prognozlari bitta qulay platformada.
           </p>
 

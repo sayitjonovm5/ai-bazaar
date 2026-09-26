@@ -11,7 +11,7 @@ const plans = [
     period: "doimiy bepul",
     popular: false,
     features: [
-      "24,000+ UZEX tovarlarini qidirish",
+      "10,000+ UZEX tovarlarini qidirish",
       "Haftalik yangilanadigan joriy narxlar",
       "5 tagacha tovarlarni portfelga saqlash",
       "Asosiy bozor dinamikasi indeksi",
@@ -24,7 +24,7 @@ const plans = [
   {
     name: "Pro Treyder",
     tagline: "Xarid va savdo qiluvchi faol tadbirkorlar va treyderlar uchun",
-    price: "490,000",
+    price: "95,000",
     period: "UZS / oyiga",
     popular: true,
     features: [

@@ -48,7 +48,7 @@ export default function CallToAction() {
                 href="/search"
                 className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 text-base font-semibold text-white bg-white/10 hover:bg-white/20 border border-white/20 rounded-full transition-all duration-200 cursor-pointer backdrop-blur-sm"
               >
-                24,000+ tovarlarni qidirish
+                10,000+ tovarlarni qidirish
               </Link>
             </div>
 
