@@ -35,7 +35,11 @@ export async function POST(req: Request, props: { params: Promise<{ id: string }
       productName,
       companyName: body.name,
       price: parseFloat(body.price),
-      contact: body.contact,
+      phoneNumber: body.phoneNumber,
+      email: body.email || null,
+      whatsapp: body.whatsapp || null,
+      instagram: body.instagram || null,
+      telegram: body.telegram || null,
       description: body.description,
       imageUrl: body.imageUrl,
       userId: (session.user as any).id

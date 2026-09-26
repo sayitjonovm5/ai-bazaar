@@ -1,16 +1,35 @@
 import { prisma } from "@/lib/prisma";
 import ProductIcon from "@/components/ProductIcon";
-import { Phone, Calendar, Store } from "lucide-react";
+import { User, Phone, Calendar, Store } from "lucide-react";
 import Link from "next/link";
+import MarketplaceSearch from "./MarketplaceSearch";
 
-export default async function MarketplacePage() {
+export default async function MarketplacePage({ searchParams }: { searchParams: { q?: string } }) {
+  const q = searchParams?.q || "";
   const offers = await prisma.supplierOffer.findMany({
-    orderBy: { createdAt: "desc" }
+    where: q ? {
+      OR: [
+        { productName: { contains: q } },
+        { companyName: { contains: q } },
+        { description: { contains: q } }
+      ]
+    } : undefined,
+    orderBy: { createdAt: "desc" },
+    include: { user: true }
   });
 
   return (
     <div className="max-w-7xl mx-auto py-8">
       <div className="mb-8 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
+        
+        <div className="absolute top-8 right-8 z-20 flex flex-col gap-3">
+          <Link href="/marketplace/add" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm">
+            + Taklif qo'shish
+          </Link>
+          <Link href="/profile" className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors text-center shadow-sm">
+            Profilni tahrirlash
+          </Link>
+        </div>
         <div className="relative z-10">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">B2B Marketplace</h1>
           <p className="text-gray-500 max-w-2xl text-lg">
@@ -46,7 +65,23 @@ export default async function MarketplacePage() {
               </div>
             )}
 
+            
             <div className="p-5 flex-1 flex flex-col">
+              <div className="flex items-center gap-3 mb-4 border-b border-gray-50 pb-4">
+                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                  {offer.user?.profilePicture ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={offer.user.profilePicture} alt="User" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs text-gray-400">Sotuvchi</p>
+                  <p className="text-sm font-medium text-gray-800 line-clamp-1">{offer.user?.name || "Foydalanuvchi"}</p>
+                </div>
+              </div>
+  
               <h3 className="font-bold text-gray-900 text-lg mb-1">{offer.companyName}</h3>
               <p className="text-2xl font-bold text-emerald-600 mb-4">{Number(offer.price).toLocaleString()} UZS</p>
               
