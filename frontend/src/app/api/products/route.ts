@@ -27,11 +27,11 @@ export async function GET() {
       const cleanName = row.Product_Name.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
       
       const unit = row.Unit || "tonna";
-      const key = \__\;
+      const key = `${row.Product_Name}__${unit}`;
       
       if (!productMap.has(key)) {
         productMap.set(key, {
-          id: unit !== "tonna" ? \?unit=\ : row.Product_Name,
+          id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
           name: cleanName,
           category: row.Category || "Other",
           contractType: contractType,
