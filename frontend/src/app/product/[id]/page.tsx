@@ -135,14 +135,11 @@ export default function ProductDetailsPage() {
               }`}>
                 {contractType}
               </span>
-<<<<<<< HEAD
               {productUnit && (
                 <span className="px-2.5 py-0.5 bg-slate-100 text-slate-600 text-xs font-semibold rounded-lg border border-slate-200">
                   {productUnit}
                 </span>
               )}
-=======
->>>>>>> Asliddin
             </div>
             <p className="text-slate-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
           </div>
