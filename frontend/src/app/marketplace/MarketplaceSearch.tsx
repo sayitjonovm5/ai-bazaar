@@ -1,41 +1,46 @@
 "use client";
-
 import { useRouter, useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
-import { useState, Suspense } from "react";
-
+import { useState, Suspense, useTransition } from "react";
 function SearchInput() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(searchParams?.get("q") || "");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (query.trim()) {
-      router.push(`/marketplace?q=${encodeURIComponent(query.trim())}`);
-    } else {
-      router.push('/marketplace');
-    }
-  };
-
+  const [query, setQuery] = useState(searchParams.get("q") || "");
+  const [pending, startTransition] = useTransition();
   return (
-    <form onSubmit={handleSearch} className="relative w-full md:w-96 mt-6">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-      <input 
-        type="text" 
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="Mahsulot yoki sotuvchi qidiring..."
-        className="w-full pl-10 pr-4 py-3 bg-white border border-gray-200 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all text-sm"
-      />
-      <button type="submit" className="hidden">Qidirish</button>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        startTransition(() =>
+          router.push(
+            query.trim()
+              ? "/marketplace?q=" + encodeURIComponent(query.trim())
+              : "/marketplace",
+          ),
+        );
+      }}
+      className="relative mt-6 flex w-full max-w-xl gap-2"
+    >
+      <div className="relative min-w-0 flex-1">
+        <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <input
+          type="search"
+          aria-label="Marketplace takliflarini qidirish"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Mahsulot yoki sotuvchi qidiring..."
+          className="form-input h-11 pl-10"
+        />
+      </div>
+      <button type="submit" disabled={pending} className="button-primary">
+        {pending ? "Qidirilmoqda..." : "Qidirish"}
+      </button>
     </form>
   );
 }
-
 export default function MarketplaceSearch() {
   return (
-    <Suspense fallback={<div className="h-12 w-96 bg-gray-100 animate-pulse rounded-xl mt-6"></div>}>
+    <Suspense fallback={<div className="skeleton mt-6 h-11 w-full max-w-xl" />}>
       <SearchInput />
     </Suspense>
   );
