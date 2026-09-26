@@ -124,18 +124,18 @@ export default function SearchPage() {
     <div className="max-w-5xl mx-auto py-6">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Mahsulotlar Qidiruvi</h1>
-          <p className="text-gray-500 text-sm mt-1">UZEX haftalik byulletenidagi barcha tovar va xomashyolar</p>
+          <h1 className="text-3xl font-bold text-slate-900">Mahsulotlar Qidiruvi</h1>
+          <p className="text-slate-500 text-sm mt-1">UZEX haftalik byulletenidagi barcha tovar va xomashyolar</p>
         </div>
       </div>
 
       <div className="relative mb-4">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <SearchIcon className="h-5 w-5 text-gray-400" />
+          <SearchIcon className="h-5 w-5 text-slate-400" />
         </div>
         <input
           type="text"
-          className="block w-full pl-11 pr-4 py-3 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm"
+          className="block w-full pl-11 pr-4 py-3 border border-white/70 rounded-2xl leading-5 bg-white/65 backdrop-blur-xl placeholder-slate-400 text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 sm:text-sm shadow-2xs transition-all"
           placeholder="Nomi yoki toifasi bo'yicha qidirish (masalan: Avtobenzin, Sement, Armatura)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -148,10 +148,10 @@ export default function SearchPage() {
           <button
             key={cat.value}
             onClick={() => setSelectedCategory(cat.value)}
-            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-medium shrink-0 transition-all ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
               selectedCategory === cat.value
-                ? "bg-blue-600 text-white shadow-sm ring-2 ring-blue-600/30"
-                : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "bg-white/60 backdrop-blur-md text-slate-700 hover:bg-white/80 border border-white/60"
             }`}
           >
             {cat.value !== "All" && (
@@ -230,7 +230,7 @@ export default function SearchPage() {
               <div className="flex justify-center mt-8 mb-4">
                 <button 
                   onClick={() => setDisplayCount(prev => prev + 60)}
-                  className="px-6 py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl shadow-sm hover:bg-gray-50 transition-colors"
+                  className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
                 >
                   Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
                 </button>

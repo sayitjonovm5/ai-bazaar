@@ -44,7 +44,7 @@ export async function POST(req: Request) {
           const name = row.Product_Name.toLowerCase();
           const cat = (row.Category || "").toLowerCase();
           
-          if (words.some(word => name.includes(word) || cat.includes(word))) {
+          if (words.some((word: string) => name.includes(word) || cat.includes(word))) {
             // Keep overwriting so we get the latest row (assuming chronological)
             matches.set(row.Product_Name, row);
           }

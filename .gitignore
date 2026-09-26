@@ -1,3 +1,13 @@
-﻿node_modules/
+﻿# Local environment and secrets
+.env
+.env.*
+!.env.example
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Dependencies
+node_modules/
 */node_modules/
-.env*
