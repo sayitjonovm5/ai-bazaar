@@ -18,6 +18,8 @@ export const authOptions: NextAuthOptions = {
         name: { label: "Name", type: "text" },
         role: { label: "Role", type: "text" },
         isRegister: { label: "isRegister", type: "text" },
+        isGoogleAuth: { label: "isGoogleAuth", type: "text" },
+        image: { label: "Image", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.email) {
@@ -28,6 +30,58 @@ export const authOptions: NextAuthOptions = {
         const existingUser = await prisma.user.findUnique({
           where: { email },
         });
+
+        const cleanName = credentials.name && credentials.name !== "undefined"
+          ? credentials.name.trim()
+          : email.split("@")[0];
+        const cleanRole = credentials.role && credentials.role !== "undefined"
+          ? credentials.role
+          : "BUYER";
+
+        // Smart Google Auth flow
+        if (credentials.isGoogleAuth === "true") {
+          let user = existingUser;
+          const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(cleanName)}&backgroundColor=2563eb,3b82f6,1d4ed8`;
+          const avatarUrl = credentials.image || defaultAvatar;
+
+          if (!user) {
+            user = await prisma.user.create({
+              data: {
+                email,
+                name: cleanName,
+                provider: "google",
+                profilePicture: avatarUrl,
+                role: cleanRole,
+              },
+            });
+          } else {
+            // Update profile info if placeholder or missing
+            const dataToUpdate: any = {};
+            if ((!user.name || user.name === "undefined") && cleanName) {
+              dataToUpdate.name = cleanName;
+            }
+            if ((!user.role || user.role === "undefined") && cleanRole) {
+              dataToUpdate.role = cleanRole;
+            }
+            if (!user.profilePicture && avatarUrl) {
+              dataToUpdate.profilePicture = avatarUrl;
+            }
+            if (Object.keys(dataToUpdate).length > 0) {
+              user = await prisma.user.update({
+                where: { id: user.id },
+                data: dataToUpdate,
+              });
+            }
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            image: user.profilePicture || avatarUrl,
+          };
+        }
 
         // Registration flow
         if (credentials.isRegister === "true") {
@@ -42,9 +96,9 @@ export const authOptions: NextAuthOptions = {
           const newUser = await prisma.user.create({
             data: {
               email,
-              name: credentials.name || email.split("@")[0],
+              name: cleanName,
               password: hashedPassword,
-              role: credentials.role || "BUYER",
+              role: cleanRole,
               provider: "credentials",
             },
           });
@@ -68,9 +122,9 @@ export const authOptions: NextAuthOptions = {
           const newUser = await prisma.user.create({
             data: {
               email,
-              name: credentials.name || email.split("@")[0],
+              name: cleanName,
               password: hashedPassword,
-              role: credentials.role || "BUYER",
+              role: cleanRole,
               provider: "credentials",
             },
           });
