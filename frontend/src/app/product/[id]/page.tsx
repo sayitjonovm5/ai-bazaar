@@ -230,14 +230,9 @@ export default function ProductDetailsPage() {
                     <tr key={i} className="border-b border-white/40 hover:bg-white/50 transition-colors">
                       <td className="px-4 py-3 font-semibold text-slate-900 whitespace-nowrap">{row.Date}</td>
                       <td className="px-4 py-3">{row.Category}</td>
-<<<<<<< HEAD
+                      <td className="px-4 py-3 text-xs font-semibold text-blue-600">{row.Unit || productUnit}</td>
                       <td className="px-4 py-3 font-medium text-slate-900">{Number(row.Current_Price).toLocaleString()}</td>
                       <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-emerald-600' : row.Trend === '▼' ? 'text-rose-600' : 'text-slate-400'}`}>{row.Trend}</td>
-=======
-                      <td className="px-4 py-3 text-xs font-semibold text-blue-600">{row.Unit || productUnit}</td>
-                      <td className="px-4 py-3">{Number(row.Current_Price).toLocaleString()}</td>
-                      <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-green-600' : row.Trend === '▼' ? 'text-red-600' : 'text-gray-400'}`}>{row.Trend}</td>
->>>>>>> origin/Abrorjon
                       <td className="px-4 py-3">{Number(row.Price_Change).toLocaleString()}</td>
                       <td className="px-4 py-3">{row.Price_Change_Percent}%</td>
                       <td className="px-4 py-3 text-xs">{row.Period}</td>
@@ -245,11 +240,7 @@ export default function ProductDetailsPage() {
                   ))}
                   {rawData.length === 0 && (
                      <tr>
-<<<<<<< HEAD
-                       <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
-=======
-                       <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
->>>>>>> origin/Abrorjon
+                       <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                          Ma'lumot topilmadi
                        </td>
                      </tr>

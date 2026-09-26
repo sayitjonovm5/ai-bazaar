@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { parse } from "csv-parse/sync";
+import Papa from "papaparse";
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const fileContent = fs.readFileSync(csvFilePath, "utf-8");
-    const records = parse(fileContent, { columns: true, skip_empty_lines: true });
+    const { data: records } = Papa.parse(fileContent, { header: true, skipEmptyLines: true });
 
     // Group by Product_Name + Unit
     const productMap = new Map();
