@@ -21,21 +21,22 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
   return (
     <div className="max-w-7xl mx-auto py-8">
-      <div className="mb-8 bg-white/70 backdrop-blur-2xl p-8 rounded-3xl border border-white/60 shadow-xs relative overflow-hidden">
+      <div className="mb-8 glass-panel p-8 rounded-3xl relative overflow-hidden">
         
         <div className="absolute top-8 right-8 z-20 flex flex-col gap-3">
-          <Link href="/marketplace/add" className="bg-blue-600/90 hover:bg-blue-600 text-white backdrop-blur-md px-5 py-2.5 rounded-xl text-sm font-medium transition-all shadow-md shadow-blue-600/20">
+          <Link href="/marketplace/add" className="glass-btn-blue text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all">
             + Taklif qo'shish
           </Link>
-          <Link href="/profile" className="bg-white/60 hover:bg-white/90 text-slate-700 backdrop-blur-md border border-white/70 px-5 py-2.5 rounded-xl text-sm font-medium transition-all text-center shadow-2xs">
+          <Link href="/profile" className="glass-pill hover:bg-white/90 text-slate-700 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all text-center">
             Profilni tahrirlash
           </Link>
         </div>
         <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">B2B Marketplace</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-slate-900 mb-4 tracking-tight">B2B Marketplace</h1>
           <p className="text-slate-600 max-w-2xl text-lg">
             Barcha mahsulotlar uchun global ta'minotchilar takliflari bir joyda. Eng yaxshi narxlarni toping va ishonchli hamkorlar bilan bog'laning.
           </p>
+          <MarketplaceSearch />
         </div>
         <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
            <Store className="w-48 h-48 text-slate-900" />
@@ -44,8 +45,8 @@ export default async function MarketplacePage({ searchParams }: { searchParams: 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {offers.map((offer: any) => (
-          <div key={offer.id} className="group bg-white/75 backdrop-blur-xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-lg hover:bg-white/90 transition-all duration-200 rounded-2xl flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-white/50 flex items-center justify-between bg-white/40 backdrop-blur-sm">
+          <div key={offer.id} className="group glass-card glass-card-hover rounded-2xl flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-white/50 flex items-center justify-between bg-white/40 backdrop-blur-md">
               <div className="flex items-center gap-3">
                 <ProductIcon name={offer.productName} size="sm" />
                 <span className="font-semibold text-sm text-slate-800 truncate max-w-[120px]">{offer.productName}</span>

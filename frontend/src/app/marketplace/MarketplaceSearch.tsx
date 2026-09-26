@@ -26,7 +26,7 @@ function SearchInput() {
         value={query}
         onChange={e => setQuery(e.target.value)}
         placeholder="Mahsulot yoki sotuvchi qidiring..."
-        className="w-full pl-10 pr-4 py-2.5 bg-white/65 backdrop-blur-xl border border-white/70 rounded-full shadow-2xs outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 transition-all text-sm text-slate-800 placeholder-slate-400"
+        className="w-full pl-10 pr-4 py-2.5 glass-input rounded-full text-sm text-slate-800 placeholder-slate-400 focus:outline-none"
       />
       <button type="submit" className="hidden">Qidirish</button>
     </form>

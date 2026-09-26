@@ -37,7 +37,7 @@ export default function ProductRow({
   const isNegative = changePercent < 0;
 
   return (
-    <div className="group flex items-center justify-between p-4 mb-2 bg-white/75 backdrop-blur-md border border-white/60 shadow-2xs hover:shadow-sm hover:bg-white/90 rounded-xl transition-all">
+    <div className="group glass-card glass-card-hover flex items-center justify-between p-4 mb-2.5 rounded-xl transition-all">
       <div className="flex-1 min-w-0 pr-4 flex items-center">
         {onPinToggle && (
           <button

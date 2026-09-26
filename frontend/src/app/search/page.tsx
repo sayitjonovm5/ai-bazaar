@@ -135,7 +135,7 @@ export default function SearchPage() {
         </div>
         <input
           type="text"
-          className="block w-full pl-11 pr-4 py-3 border border-white/70 rounded-2xl leading-5 bg-white/65 backdrop-blur-xl placeholder-slate-400 text-slate-800 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 sm:text-sm shadow-2xs transition-all"
+          className="block w-full pl-11 pr-4 py-3.5 rounded-2xl leading-5 glass-input placeholder-slate-400 text-slate-800 focus:outline-none sm:text-sm"
           placeholder="Nomi yoki toifasi bo'yicha qidirish (masalan: Avtobenzin, Sement, Armatura)..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -151,7 +151,7 @@ export default function SearchPage() {
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold shrink-0 transition-all ${
               selectedCategory === cat.value
                 ? "bg-slate-900 text-white shadow-xs"
-                : "bg-white/60 backdrop-blur-md text-slate-700 hover:bg-white/80 border border-white/60"
+                : "glass-pill text-slate-700 hover:bg-white/80"
             }`}
           >
             {cat.value !== "All" && (
@@ -230,7 +230,7 @@ export default function SearchPage() {
               <div className="flex justify-center mt-8 mb-4">
                 <button 
                   onClick={() => setDisplayCount(prev => prev + 60)}
-                  className="px-6 py-2.5 bg-white/60 hover:bg-white/90 border border-white/70 text-slate-700 font-semibold rounded-xl shadow-2xs backdrop-blur-md transition-all"
+                  className="px-6 py-2.5 glass-pill hover:bg-white/80 text-slate-700 font-semibold rounded-full transition-all cursor-pointer"
                 >
                   Yana ko'rsatish ({filteredProducts.length - displayCount} ta qoldi)
                 </button>

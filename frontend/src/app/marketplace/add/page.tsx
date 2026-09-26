@@ -75,26 +75,26 @@ export default function AddOfferPage() {
 
   return (
     <div className="max-w-2xl mx-auto py-12 px-4">
-      <Link href="/marketplace" className="inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-900 mb-6 bg-white/60 hover:bg-white/90 px-4 py-2 rounded-xl backdrop-blur-md border border-white/70 shadow-2xs transition-all">
+      <Link href="/marketplace" className="inline-flex items-center text-sm font-semibold text-slate-700 hover:text-slate-900 mb-6 glass-pill hover:bg-white/80 px-4 py-2 rounded-full transition-all">
         <ArrowLeft className="w-4 h-4 mr-1.5" /> Orqaga qaytish
       </Link>
       
-      <div className="bg-white/75 backdrop-blur-2xl p-8 rounded-3xl border border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-        <h1 className="text-3xl font-bold mb-2 text-slate-900">Yangi taklif qo'shish</h1>
-        <p className="text-slate-500 mb-8">O'z mahsulotingizni B2B maydonchasiga joylang.</p>
+      <div className="glass-panel p-8 sm:p-10 rounded-3xl">
+        <h1 className="text-3xl font-extrabold mb-2 text-slate-900 tracking-tight">Yangi taklif qo'shish</h1>
+        <p className="text-slate-500 mb-8 text-sm">O'z mahsulotingizni B2B maydonchasiga joylang.</p>
         
-        {error && <div className="bg-rose-500/10 border border-rose-500/20 text-rose-700 p-4 rounded-xl mb-6 backdrop-blur-md">{error}</div>}
+        {error && <div className="bg-rose-500/10 border border-rose-500/20 text-rose-700 p-4 rounded-xl mb-6 backdrop-blur-md text-sm">{error}</div>}
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Kompaniya nomi *</label>
-            <input type="text" required value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 outline-none text-slate-900 transition-all shadow-2xs" placeholder="Masalan: MCHJ Agro" />
+            <input type="text" required value={formData.companyName} onChange={e => setFormData({...formData, companyName: e.target.value})} className="w-full p-3.5 glass-input rounded-xl text-slate-900 focus:outline-none" placeholder="Masalan: MCHJ Agro" />
           </div>
           
           <div className="relative">
             <label className="block text-sm font-semibold text-slate-700 mb-2">Mahsulotni tanlang *</label>
             <div 
-              className="w-full p-3 border border-white/70 rounded-xl bg-white/60 backdrop-blur-md cursor-pointer flex justify-between items-center transition-all shadow-2xs hover:bg-white/80"
+              className="w-full p-3.5 glass-input rounded-xl cursor-pointer flex justify-between items-center transition-all"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
               <span className={formData.productName ? "text-slate-900 font-medium" : "text-slate-400"}>
@@ -104,23 +104,23 @@ export default function AddOfferPage() {
             </div>
             
             {isDropdownOpen && (
-              <div className="absolute z-50 w-full mt-2 bg-white/95 backdrop-blur-2xl border border-white/80 rounded-2xl shadow-xl max-h-80 flex flex-col overflow-hidden">
+              <div className="absolute z-50 w-full mt-2 glass-panel rounded-2xl shadow-2xl max-h-80 flex flex-col overflow-hidden border border-white/80">
                 <div className="p-3 border-b border-white/60">
                   <div className="relative">
                     <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input 
                       type="text" 
                       placeholder="Qidirish..." 
-                      className="w-full pl-9 p-2 bg-slate-100/70 border border-white/60 rounded-xl outline-none text-sm text-slate-800"
+                      className="w-full pl-9 p-2 glass-input rounded-xl outline-none text-sm text-slate-800"
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
                     />
                   </div>
                 </div>
                 <div className="flex border-b border-white/60 overflow-x-auto p-2 gap-2">
-                  <button type="button" onClick={() => setSelectedCategory("")} className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium transition-all ${!selectedCategory ? 'bg-slate-900 text-white shadow-xs' : 'bg-white/50 text-slate-600 hover:bg-white/80'}`}>Barchasi</button>
+                  <button type="button" onClick={() => setSelectedCategory("")} className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium transition-all ${!selectedCategory ? 'bg-slate-900 text-white shadow-xs' : 'glass-pill text-slate-600 hover:text-slate-900'}`}>Barchasi</button>
                   {categories.map(c => (
-                    <button key={c} type="button" onClick={() => setSelectedCategory(c)} className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium transition-all ${selectedCategory === c ? 'bg-slate-900 text-white shadow-xs' : 'bg-white/50 text-slate-600 hover:bg-white/80'}`}>{c}</button>
+                    <button key={c} type="button" onClick={() => setSelectedCategory(c)} className={`px-3 py-1.5 rounded-lg text-xs whitespace-nowrap font-medium transition-all ${selectedCategory === c ? 'bg-slate-900 text-white shadow-xs' : 'glass-pill text-slate-600 hover:text-slate-900'}`}>{c}</button>
                   ))}
                 </div>
                 <div className="overflow-y-auto p-2">
@@ -144,12 +144,12 @@ export default function AddOfferPage() {
 
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Narxi (UZS) *</label>
-            <input type="number" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 outline-none text-slate-900 transition-all shadow-2xs" placeholder="Masalan: 15000" />
+            <input type="number" required value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="w-full p-3.5 glass-input rounded-xl text-slate-900 focus:outline-none" placeholder="Masalan: 15000" />
           </div>
           
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Tavsif</label>
-            <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 outline-none text-slate-900 transition-all shadow-2xs" placeholder="Mahsulot haqida qo'shimcha ma'lumot..."></textarea>
+            <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-3.5 glass-input rounded-xl text-slate-900 focus:outline-none" placeholder="Mahsulot haqida qo'shimcha ma'lumot..."></textarea>
           </div>
 
           <div className="border-t border-white/60 pt-6">
@@ -157,37 +157,37 @@ export default function AddOfferPage() {
             
             <div className="mb-4">
               <label className="block text-sm font-semibold text-slate-700 mb-2">Telefon raqam *</label>
-              <input type="text" required value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 outline-none text-slate-900 transition-all shadow-2xs" placeholder="+998 90 123 45 67" />
+              <input type="text" required value={formData.phoneNumber} onChange={e => setFormData({...formData, phoneNumber: e.target.value})} className="w-full p-3.5 glass-input rounded-xl text-slate-900 focus:outline-none" placeholder="+998 90 123 45 67" />
             </div>
 
             {!showMoreContact ? (
-              <button type="button" onClick={() => setShowMoreContact(true)} className="text-sm text-blue-600 font-semibold flex items-center gap-1 hover:underline">
+              <button type="button" onClick={() => setShowMoreContact(true)} className="text-sm text-blue-600 font-semibold flex items-center gap-1 hover:underline cursor-pointer">
                 <Plus className="w-4 h-4" /> Boshqa aloqa vositalarini qo'shish
               </button>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white/50 backdrop-blur-md p-5 rounded-2xl border border-white/60">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 glass-card p-5 rounded-2xl">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Email</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-2.5 bg-white/70 border border-white/70 rounded-lg outline-none text-sm text-slate-800" placeholder="Sizning email manzilingiz" />
+                  <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-2.5 glass-input rounded-lg text-sm text-slate-800" placeholder="Sizning email manzilingiz" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Telegram</label>
-                  <input type="text" value={formData.telegram} onChange={e => setFormData({...formData, telegram: e.target.value})} className="w-full p-2.5 bg-white/70 border border-white/70 rounded-lg outline-none text-sm text-slate-800" placeholder="@username" />
+                  <input type="text" value={formData.telegram} onChange={e => setFormData({...formData, telegram: e.target.value})} className="w-full p-2.5 glass-input rounded-lg text-sm text-slate-800" placeholder="@username" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">WhatsApp</label>
-                  <input type="text" value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full p-2.5 bg-white/70 border border-white/70 rounded-lg outline-none text-sm text-slate-800" placeholder="+998 90 123 45 67" />
+                  <input type="text" value={formData.whatsapp} onChange={e => setFormData({...formData, whatsapp: e.target.value})} className="w-full p-2.5 glass-input rounded-lg text-sm text-slate-800" placeholder="+998 90 123 45 67" />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Instagram</label>
-                  <input type="text" value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full p-2.5 bg-white/70 border border-white/70 rounded-lg outline-none text-sm text-slate-800" placeholder="@username" />
+                  <input type="text" value={formData.instagram} onChange={e => setFormData({...formData, instagram: e.target.value})} className="w-full p-2.5 glass-input rounded-lg text-sm text-slate-800" placeholder="@username" />
                 </div>
               </div>
             )}
           </div>
           
           <div className="flex gap-4 pt-4">
-            <button disabled={isSubmitting} type="submit" className="w-full bg-blue-600/90 text-white px-6 py-4 rounded-xl font-bold hover:bg-blue-600 transition-all shadow-md shadow-blue-600/20 backdrop-blur-md disabled:opacity-50">
+            <button disabled={isSubmitting} type="submit" className="w-full glass-btn-blue text-white px-6 py-4 rounded-xl font-bold transition-all disabled:opacity-50 cursor-pointer">
               {isSubmitting ? "Saqlanmoqda..." : "Taklifni joylash"}
             </button>
           </div>
