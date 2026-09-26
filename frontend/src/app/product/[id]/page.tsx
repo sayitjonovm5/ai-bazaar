@@ -106,6 +106,9 @@ export default function ProductDetailsPage() {
   };
 
   const decodedName = typeof id === "string" ? decodeURIComponent(id) : "";
+  const isForward = decodedName.toLowerCase().includes('(forvard)');
+  const contractType = isForward ? "Forvard" : "Spot";
+  const cleanName = decodedName.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
 
   return (
     <div className="max-w-7xl mx-auto py-6 h-full flex flex-col relative">
@@ -121,15 +124,26 @@ export default function ProductDetailsPage() {
       )}
       <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
         <div className="flex items-center space-x-4">
-          <ProductIcon name={decodedName} size="xl" showCategoryHint={true} />
+          <ProductIcon name={cleanName} size="xl" showCategoryHint={true} />
           <div>
             <div className="flex items-center gap-3">
+<<<<<<< HEAD
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{decodedName}</h1>
               {productUnit && (
                 <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200">
                   {productUnit}
                 </span>
               )}
+=======
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{cleanName}</h1>
+              <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                isForward 
+                  ? 'bg-purple-50 text-purple-700 border-purple-200'
+                  : 'bg-blue-50 text-blue-700 border-blue-200'
+              }`}>
+                {contractType}
+              </span>
+>>>>>>> origin/Abrorjon
             </div>
             <p className="text-gray-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
           </div>

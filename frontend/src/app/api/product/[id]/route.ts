@@ -6,7 +6,12 @@ import Papa from "papaparse";
 export async function GET(request: Request, props: { params: Promise<{ id: string }> }) {
   try {
     const params = await props.params;
-    const productId = decodeURIComponent(params.id);
+    let productId = params.id;
+    try {
+      productId = decodeURIComponent(params.id);
+    } catch (e) {
+      // Ignore if it throws (meaning it's already decoded and has raw % signs)
+    }
     
     // Parse historical data
     const histPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");

@@ -1,61 +1,57 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import Papa from "papaparse";
+import { parse } from "csv-parse/sync";
 
 export async function GET() {
   try {
-    // The Next.js app is running inside "frontend/", but the data folder is in the root directory
-    const csvPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
-    const fileContent = fs.readFileSync(csvPath, "utf8");
+    const csvFilePath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
     
-    // Parse the CSV
-    const { data } = Papa.parse(fileContent, {
-      header: true,
-      skipEmptyLines: true,
-    });
-    
-    // Process the data: Group by Product_Name and Unit to get current price, category, and historical prices
+    if (!fs.existsSync(csvFilePath)) {
+      return NextResponse.json({ error: "Data file not found" }, { status: 404 });
+    }
+
+    const fileContent = fs.readFileSync(csvFilePath, "utf-8");
+    const records = parse(fileContent, { columns: true, skip_empty_lines: true });
+
+    // Group by Product_Name + Unit
     const productMap = new Map();
-    
-    data.forEach((row: any) => {
-      if (!row.Product_Name || !row.Current_Price_Sum) return;
-      
-      const priceStr = String(row.Current_Price_Sum).replace(/[\s,]/g, '');
+
+    records.forEach((row: any) => {
+      const priceStr = row.Average_Price ? row.Average_Price.replace(/,/g, "") : "";
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       
+      const isForward = row.Product_Name.toLowerCase().includes('(forvard)');
+      const contractType = isForward ? "Forvard" : "Spot";
+      const cleanName = row.Product_Name.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
+      
       const unit = row.Unit || "tonna";
-      const key = `${row.Product_Name}__${unit}`;
+      const key = \__\;
       
       if (!productMap.has(key)) {
         productMap.set(key, {
-          id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
-          name: row.Product_Name,
+          id: unit !== "tonna" ? \?unit=\ : row.Product_Name,
+          name: cleanName,
           category: row.Category || "Other",
+          contractType: contractType,
           unit: unit,
           currentPrice: price,
           changePercent: parseFloat(row.Price_Change_Percent) || 0,
-          historicalPrices: [price], // Will build this up
+          historicalPrices: [price],
         });
       } else {
         const p = productMap.get(key);
         p.historicalPrices.push(price);
-        // Assuming data is chronological, the last seen is the current price
         p.currentPrice = price;
         p.changePercent = parseFloat(row.Price_Change_Percent) || 0;
       }
     });
 
-    const products = Array.from(productMap.values()).map(p => {
-      // Keep only last 10 prices for sparkline to keep payload small
-      p.historicalPrices = p.historicalPrices.slice(-10);
-      return p;
-    });
-
+    const products = Array.from(productMap.values());
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error reading CSV:", error);
-    return NextResponse.json({ error: "Failed to load data" }, { status: 500 });
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
