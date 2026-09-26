@@ -60,3 +60,10 @@ Because AI models are heavy, the dashboard includes an **Administrator Mode**. B
 4. Skip products with insufficient history (less than 5 weeks of data).
 
 *(Note: If you have Streamlit running and need to move `forecasts.csv` manually into the `data/` folder, you may need to stop the server (Ctrl+C) first because Windows locks the file while the dashboard is displaying it!)*
+
+## Environment Variables (.env)
+
+> [!WARNING]
+> We have intentionally committed the `.env` file to GitHub for this repository. Because we are developing as a team, everyone needs immediate access to the database credentials and the chatbot configuration to run the project locally without friction. 
+> 
+> **Important:** This approach is strictly for rapid development and collaboration. Before deploying to production, we must ensure all sensitive keys are securely managed and rotated.
