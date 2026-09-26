@@ -13,10 +13,11 @@ export async function POST(req: Request) {
 
     const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL;
     const OLLAMA_MODEL = process.env.OLLAMA_MODEL;
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
     if (!OLLAMA_BASE_URL || !OLLAMA_MODEL) {
       return NextResponse.json(
-        { error: "Ollama configuration is missing in the backend." },
+        { error: "Ollama/Groq configuration is missing in the backend." },
         { status: 500 }
       );
     }
@@ -82,24 +83,32 @@ export async function POST(req: Request) {
       console.error("Error reading RAG context:", e);
     }
 
-    const systemPrompt = `You are a strict data extraction AI. Answer the user's question directly using ONLY the provided market data. Do not use conversational filler. Do not say "I am ready" or "Here is the data". Just give the final answer immediately.`;
+    const systemPrompt = `You are an AI assistant specializing strictly in data, economics, and entrepreneurship. Answer the user's question directly using the provided market data if applicable. If the user's question is NOT related to data, economics, entrepreneurship, or market analysis, you MUST decline to answer and state that you only answer questions related to these topics (e.g. say "I can only answer questions related to data, economics, and entrepreneurship."). Do not use conversational filler.`;
     
-    const finalPrompt = contextData 
-      ? `${systemPrompt}\n\n${contextData}\nUser Question: ${message}\nAnswer:` 
-      : `${systemPrompt}\n\nUser Question: ${message}\nAnswer:`;
+    const systemContent = contextData 
+      ? `${systemPrompt}\n\n${contextData}`
+      : systemPrompt;
 
-    const response = await fetch(OLLAMA_BASE_URL, {
+    const chatUrl = OLLAMA_BASE_URL.replace('/api/generate', '/api/chat');
+
+    const fetchHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (GROQ_API_KEY) {
+      fetchHeaders["Authorization"] = `Bearer ${GROQ_API_KEY}`;
+    }
+
+    const response = await fetch(chatUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: fetchHeaders,
       body: JSON.stringify({
         model: OLLAMA_MODEL,
-        prompt: finalPrompt,
-        stream: false,
-        options: {
-          num_ctx: 2048
-        }
+        messages: [
+          { role: "system", content: systemContent },
+          { role: "user", content: message }
+        ],
+        stream: false
       }),
     });
 
@@ -115,7 +124,7 @@ export async function POST(req: Request) {
     const data = await response.json();
     
     // Clean up APST token artifacts from the custom Uzbek model
-    let reply = data.response || "";
+    let reply = data.choices?.[0]?.message?.content || data.message?.content || data.response || "";
     reply = reply.replace(/APST/g, "'");
     
     return NextResponse.json({ reply });
