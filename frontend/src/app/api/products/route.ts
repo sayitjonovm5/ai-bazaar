@@ -15,7 +15,7 @@ export async function GET() {
       skipEmptyLines: true,
     });
     
-    // Process the data: Group by Product_Name to get current price, category, and historical prices
+    // Process the data: Group by Product_Name and Unit to get current price, category, and historical prices
     const productMap = new Map();
     
     data.forEach((row: any) => {
@@ -25,18 +25,21 @@ export async function GET() {
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       
-      if (!productMap.has(row.Product_Name)) {
-        productMap.set(row.Product_Name, {
-          id: row.Product_Name, // Using name as ID for simplicity
+      const unit = row.Unit || "tonna";
+      const key = `${row.Product_Name}__${unit}`;
+      
+      if (!productMap.has(key)) {
+        productMap.set(key, {
+          id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
           name: row.Product_Name,
           category: row.Category || "Other",
-          unit: "unit", // Can be extracted from name if needed
+          unit: unit,
           currentPrice: price,
           changePercent: parseFloat(row.Price_Change_Percent) || 0,
           historicalPrices: [price], // Will build this up
         });
       } else {
-        const p = productMap.get(row.Product_Name);
+        const p = productMap.get(key);
         p.historicalPrices.push(price);
         // Assuming data is chronological, the last seen is the current price
         p.currentPrice = price;

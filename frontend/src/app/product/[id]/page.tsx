@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { LineChart, Line, Area, ComposedChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Plus, Building2, Phone, Loader2, ArrowLeft } from "lucide-react";
@@ -10,6 +10,8 @@ import ProductIcon from "@/components/ProductIcon";
 
 export default function ProductDetailsPage() {
   const { id } = useParams();
+  const searchParams = useSearchParams();
+  const unitParam = searchParams.get("unit");
   const { data: session } = useSession();
   
   const [showAddForm, setShowAddForm] = useState(false);
@@ -18,6 +20,7 @@ export default function ProductDetailsPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
+  const [productUnit, setProductUnit] = useState(unitParam || "tonna");
   
   const [chartData, setChartData] = useState<any[]>([]);
   const [rawData, setRawData] = useState<any[]>([]);
@@ -27,9 +30,13 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     if (!id) return;
     
-    fetch(`/api/product/${id}`)
+    const url = unitParam ? `/api/product/${id}?unit=${encodeURIComponent(unitParam)}` : `/api/product/${id}`;
+    fetch(url)
       .then(res => res.json())
       .then(data => {
+        if (data.unit) {
+          setProductUnit(data.unit);
+        }
         if (data.chartData) {
           setChartData(data.chartData);
         }
@@ -43,7 +50,7 @@ export default function ProductDetailsPage() {
         console.error(err);
         setIsLoading(false);
       });
-  }, [id]);
+  }, [id, unitParam]);
 
   // Fetch suppliers
   useEffect(() => {
@@ -116,7 +123,14 @@ export default function ProductDetailsPage() {
         <div className="flex items-center space-x-4">
           <ProductIcon name={decodedName} size="xl" showCategoryHint={true} />
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{decodedName}</h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{decodedName}</h1>
+              {productUnit && (
+                <span className="px-2.5 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-lg border border-blue-200">
+                  {productUnit}
+                </span>
+              )}
+            </div>
             <p className="text-gray-500 text-sm mt-1">AI-powered narx tahlili, haftalik prognoz va B2B ta'minotchi takliflari</p>
           </div>
         </div>
@@ -192,6 +206,7 @@ export default function ProductDetailsPage() {
                   <tr>
                     <th className="px-4 py-3">Sana (Date)</th>
                     <th className="px-4 py-3">Kategoriya</th>
+                    <th className="px-4 py-3">O'lchov</th>
                     <th className="px-4 py-3">Joriy narx (UZS)</th>
                     <th className="px-4 py-3">Trend</th>
                     <th className="px-4 py-3">O'zgarish (UZS)</th>
@@ -204,6 +219,7 @@ export default function ProductDetailsPage() {
                     <tr key={i} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">{row.Date}</td>
                       <td className="px-4 py-3">{row.Category}</td>
+                      <td className="px-4 py-3 text-xs font-semibold text-blue-600">{row.Unit || productUnit}</td>
                       <td className="px-4 py-3">{Number(row.Current_Price).toLocaleString()}</td>
                       <td className={`px-4 py-3 font-bold ${row.Trend === '▲' ? 'text-green-600' : row.Trend === '▼' ? 'text-red-600' : 'text-gray-400'}`}>{row.Trend}</td>
                       <td className="px-4 py-3">{Number(row.Price_Change).toLocaleString()}</td>
@@ -213,7 +229,7 @@ export default function ProductDetailsPage() {
                   ))}
                   {rawData.length === 0 && (
                      <tr>
-                       <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                       <td colSpan={8} className="px-4 py-8 text-center text-gray-500">
                          Ma'lumot topilmadi
                        </td>
                      </tr>

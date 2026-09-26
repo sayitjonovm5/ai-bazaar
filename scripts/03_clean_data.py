@@ -100,9 +100,16 @@ def clean_data(input_csv, output_csv, cache_file):
             translation_cache = json.load(f)
         print(f"Loaded {len(translation_cache)} cached translations.")
         
+    from process_units import parse_product_unit
+
     with open(input_csv, mode='r', encoding='utf-8') as infile:
         reader = csv.DictReader(infile)
-        fieldnames = reader.fieldnames
+        original_fieldnames = list(reader.fieldnames)
+        if 'Unit' in original_fieldnames:
+            fieldnames = original_fieldnames
+        else:
+            idx = original_fieldnames.index('Product_Name') + 1
+            fieldnames = original_fieldnames[:idx] + ['Unit'] + original_fieldnames[idx:]
         
         with open(output_csv, mode='w', newline='', encoding='utf-8') as outfile:
             writer = csv.DictWriter(outfile, fieldnames=fieldnames)
@@ -113,7 +120,9 @@ def clean_data(input_csv, output_csv, cache_file):
                 # all_data.csv has latinized names, so we can just look them up
                 original_name = row['Product_Name']
                 translated_name = translate_to_uzbek(original_name, translation_cache)
-                row['Product_Name'] = translated_name
+                clean_name, unit = parse_product_unit(translated_name)
+                row['Product_Name'] = clean_name
+                row['Unit'] = unit
                 
                 # Update price change direction
                 direction = transliterate(row['Price_Change_Direction']).strip()
