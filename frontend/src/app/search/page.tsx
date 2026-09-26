@@ -28,6 +28,7 @@ export default function SearchPage() {
     { label: "Oziq-ovqat / Qishloq", value: "Qishloq xo'jaligi va oziq-ovqat" },
     { label: "Kimyoviy", value: "Kimyoviy moddalar" },
     { label: "Polimerlar", value: "Polimerlar va plastmassa" },
+    { label: "Boshqa", value: "Boshqa" },
   ];
   
   const { data: session } = useSession();

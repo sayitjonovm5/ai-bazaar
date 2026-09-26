@@ -18,7 +18,11 @@ export async function GET() {
     const productMap = new Map();
 
     records.forEach((row: any) => {
-      const priceStr = row.Average_Price ? row.Average_Price.replace(/,/g, "") : "";
+      if (!row.Product_Name) return;
+      const rawPrice = row.Current_Price_Sum || row.Average_Price || row.Price;
+      if (!rawPrice) return;
+      
+      const priceStr = String(rawPrice).replace(/[\s,]/g, "");
       const price = parseFloat(priceStr);
       if (isNaN(price)) return;
       
@@ -33,7 +37,7 @@ export async function GET() {
         productMap.set(key, {
           id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
           name: cleanName,
-          category: row.Category || "Other",
+          category: row.Category || "Boshqa",
           contractType: contractType,
           unit: unit,
           currentPrice: price,
@@ -48,7 +52,12 @@ export async function GET() {
       }
     });
 
-    const products = Array.from(productMap.values());
+    const products = Array.from(productMap.values()).map((p: any) => {
+      // Keep only last 10 prices for sparkline chart to keep payload snappy and fast
+      p.historicalPrices = p.historicalPrices.slice(-10);
+      return p;
+    });
+
     return NextResponse.json(products);
   } catch (error) {
     console.error("Error reading CSV:", error);
