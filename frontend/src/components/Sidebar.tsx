@@ -19,22 +19,32 @@ export default function Sidebar() {
   const { data: session, status } = useSession();
 
   return (
-    <div className="flex h-full w-64 flex-col border-r border-gray-200 bg-white">
-      <div className="flex h-20 shrink-0 items-center px-6 py-2">
-        <Image 
-          src="/logo.png" 
-          alt="NarxNazar Logo" 
-          width={40} 
-          height={40} 
-          className="object-contain w-auto h-10"
-          priority
-        />
-        <span className="text-2xl font-bold ml-2 tracking-tight" style={{ color: '#f36523' }}>
-          NarxNazar
-        </span>
+    <div className="flex h-full w-64 sm:w-68 flex-col shrink-0 bg-gradient-to-b from-[#2563EB] via-[#1D4ED8] to-[#1E3A8A] text-white shadow-xl select-none">
+      {/* Brand Header */}
+      <div className="flex h-20 shrink-0 items-center px-6 py-4 border-b border-white/10">
+        <div className="w-10 h-10 rounded-xl bg-white p-1.5 shadow-md flex items-center justify-center shrink-0">
+          <Image 
+            src="/logo.png" 
+            alt="NarxNazar Logo" 
+            width={32} 
+            height={32} 
+            className="object-contain w-auto h-auto"
+            priority
+          />
+        </div>
+        <div className="flex flex-col ml-3">
+          <span className="text-xl font-extrabold tracking-tight text-white leading-none">
+            Narx<span className="text-amber-300">Nazar</span>
+          </span>
+          <span className="text-[10px] font-semibold text-blue-200 uppercase tracking-wider mt-1">
+            Enterprise Birja
+          </span>
+        </div>
       </div>
-      <div className="flex flex-1 flex-col overflow-y-auto px-4 py-4">
-        <nav className="flex-1 space-y-1">
+
+      {/* Navigation Links */}
+      <div className="flex flex-1 flex-col overflow-y-auto px-4 py-5">
+        <nav className="flex-1 space-y-1.5">
           {navigation.map((item) => {
             const isActive = pathname === item.href;
             const Icon = item.icon;
@@ -42,48 +52,59 @@ export default function Sidebar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group flex items-center rounded-md px-2 py-2 text-sm font-medium ${
+                className={`group flex items-center rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    ? "bg-white/20 text-white shadow-xs backdrop-blur-md border border-white/15 translate-x-0.5"
+                    : "text-blue-100/80 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 <Icon
-                  className={`mr-3 h-5 w-5 flex-shrink-0 ${
-                    isActive ? "text-blue-700" : "text-gray-400 group-hover:text-blue-600"
+                  className={`mr-3 h-5 w-5 flex-shrink-0 transition-colors ${
+                    isActive ? "text-white" : "text-blue-200/80 group-hover:text-white"
                   }`}
                   aria-hidden="true"
                 />
-                {item.name}
+                <span>{item.name}</span>
+                {isActive && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_rgba(252,211,77,0.8)]" />
+                )}
               </Link>
             );
           })}
         </nav>
         
-        <div className="mt-auto border-t border-gray-100 pt-4">
+        {/* Bottom User Profile Section */}
+        <div className="mt-auto pt-4 border-t border-white/10">
           {status === "loading" ? (
-            <div className="px-2 py-2 text-sm text-gray-500">Tizimga kirilmoqda...</div>
+            <div className="px-3 py-2 text-xs text-blue-200">Tizimga kirilmoqda...</div>
           ) : session ? (
-            <>
-              <div className="px-2 py-2 mb-2 flex items-center text-sm font-medium text-gray-900">
-                <User className="mr-3 h-5 w-5 text-gray-400" />
-                {session.user?.name || session.user?.email}
+            <div className="p-3 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15">
+              <div className="flex items-center text-xs font-semibold text-white mb-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-white/20 border border-white/30 flex items-center justify-center mr-2.5 shrink-0 text-amber-300 font-bold">
+                  {(session.user?.name || session.user?.email || "U")[0].toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-white font-medium text-xs leading-tight">
+                    {session.user?.name || session.user?.email}
+                  </p>
+                  <span className="text-[10px] text-blue-200 font-normal">Administrator</span>
+                </div>
               </div>
               <button 
                 onClick={() => signOut()}
-                className="group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 transition-colors"
+                className="group flex w-full items-center justify-center rounded-xl py-2 px-3 text-xs font-semibold text-blue-100 hover:text-white bg-white/5 hover:bg-rose-500/20 border border-white/10 hover:border-rose-400/30 transition-all cursor-pointer"
               >
-                <LogOut className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-red-600" aria-hidden="true" />
+                <LogOut className="mr-2 h-3.5 w-3.5 text-blue-200 group-hover:text-rose-300" aria-hidden="true" />
                 Tizimdan chiqish
               </button>
-            </>
+            </div>
           ) : (
             <button 
               onClick={() => signIn("credentials")}
-              className="group flex w-full items-center rounded-md px-2 py-2 text-sm font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              className="group flex w-full items-center justify-center rounded-xl py-2.5 px-3 text-xs font-semibold text-white bg-white/15 hover:bg-white/25 border border-white/20 backdrop-blur-md transition-all cursor-pointer shadow-xs"
             >
-              <LogIn className="mr-3 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-blue-600" aria-hidden="true" />
-              Tizimga kirish / Ro'yxatdan o'tish
+              <LogIn className="mr-2 h-4 w-4 text-blue-200 group-hover:text-white" aria-hidden="true" />
+              Tizimga kirish
             </button>
           )}
         </div>

@@ -148,7 +148,7 @@ export default function ProductDetailsPage() {
                   />
                   <Tooltip 
                     contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    formatter={(value: any, name: string) => {
+                    formatter={(value: any, name: any) => {
                       if (Array.isArray(value)) return [`${value[0].toLocaleString()} - ${value[1].toLocaleString()}`, 'Prognoz oraliq (Min-Max)'];
                       return [value.toLocaleString(), name === 'historical' ? 'Tarixiy narx' : 'O\'rtacha prognoz'];
                     }}
