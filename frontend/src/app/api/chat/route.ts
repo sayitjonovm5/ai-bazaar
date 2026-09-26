@@ -13,10 +13,11 @@ export async function POST(req: Request) {
 
     const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL;
     const OLLAMA_MODEL = process.env.OLLAMA_MODEL;
+    const GROQ_API_KEY = process.env.GROQ_API_KEY;
 
     if (!OLLAMA_BASE_URL || !OLLAMA_MODEL) {
       return NextResponse.json(
-        { error: "Ollama configuration is missing in the backend." },
+        { error: "Ollama/Groq configuration is missing in the backend." },
         { status: 500 }
       );
     }
@@ -90,21 +91,24 @@ export async function POST(req: Request) {
 
     const chatUrl = OLLAMA_BASE_URL.replace('/api/generate', '/api/chat');
 
+    const fetchHeaders: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    
+    if (GROQ_API_KEY) {
+      fetchHeaders["Authorization"] = `Bearer ${GROQ_API_KEY}`;
+    }
+
     const response = await fetch(chatUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: fetchHeaders,
       body: JSON.stringify({
         model: OLLAMA_MODEL,
         messages: [
           { role: "system", content: systemContent },
           { role: "user", content: message }
         ],
-        stream: false,
-        options: {
-          num_ctx: 2048
-        }
+        stream: false
       }),
     });
 
@@ -120,7 +124,7 @@ export async function POST(req: Request) {
     const data = await response.json();
     
     // Clean up APST token artifacts from the custom Uzbek model
-    let reply = data.message?.content || data.response || "";
+    let reply = data.choices?.[0]?.message?.content || data.message?.content || data.response || "";
     reply = reply.replace(/APST/g, "'");
     
     return NextResponse.json({ reply });
