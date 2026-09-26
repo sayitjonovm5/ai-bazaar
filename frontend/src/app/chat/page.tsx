@@ -3,14 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import ProductIcon from "@/components/ProductIcon";
+import { useCurrency } from "@/lib/currency-context";
+import CurrencyToggle from "@/components/CurrencyToggle";
 
 export default function ChatPage() {
+  const { currency, rate } = useCurrency();
   const [messages, setMessages] = useState([
     {
       id: 1,
       role: "assistant",
       content:
-        "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so‘rashingiz mumkin.",
+        "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari, valyuta konvertatsiyasi (UZS / USD) yoki ta'minotchilar taqqoslovi haqida so‘rashingiz mumkin.",
     },
   ]);
   const endRef = useRef<HTMLDivElement>(null);
@@ -38,7 +41,11 @@ export default function ChatPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: userMessage }),
+        body: JSON.stringify({
+          message: userMessage,
+          currency,
+          rate,
+        }),
       });
 
       const data = await res.json();
@@ -74,9 +81,15 @@ export default function ChatPage() {
 
   return (
     <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)] flex flex-col py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-slate-900">AI Bozor Tahlilchisi</h1>
-        <p className="text-slate-500 mt-1">Ma'lumotlar va prognozlar haqida savollar bering</p>
+      {/* Header with Title and Currency Switcher */}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">AI Bozor Tahlilchisi</h1>
+          <p className="text-slate-500 mt-1">
+            UZEX tovar narxlari, prognozlar va valyuta konvertatsiyasi bo'yicha tahlillar
+          </p>
+        </div>
+        <CurrencyToggle size="sm" />
       </div>
 
       <div className="flex-1 bg-white/75 backdrop-blur-2xl rounded-3xl shadow-sm border border-white/60 flex flex-col overflow-hidden">
@@ -112,15 +125,14 @@ export default function ChatPage() {
                     category: "Yoqilg'i",
                   },
                   {
+                    name: "Dollar kursi",
+                    query: "Markaziy Bank dollar kursi qancha va u tovar narxlariga qanday ta'sir qilmoqda?",
+                    category: "Boshqa",
+                  },
+                  {
                     name: "Sement PTs 400-D20",
                     query: "Sement PTs 400 narxi va kelgusi haftalik prognozi",
                     category: "Qurilish materiallari",
-                  },
-                  {
-                    name: "Armatura diametri 12 mm",
-                    query:
-                      "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
-                    category: "Metallurgiya",
                   },
                   {
                     name: "Bug'doy",
@@ -134,7 +146,7 @@ export default function ChatPage() {
                       setInput(item.query);
                       inputRef.current?.focus();
                     }}
-                    className="flex items-center gap-3 p-3 text-left rounded-xl bg-white/60 backdrop-blur-md border border-white/70 hover:bg-white/90 hover:border-blue-300 hover:shadow-xs transition-all text-xs text-slate-700 hover:text-blue-900 group"
+                    className="flex items-center gap-3 p-3 text-left rounded-xl bg-white/60 backdrop-blur-md border border-white/70 hover:bg-white/90 hover:border-blue-300 hover:shadow-xs transition-all text-xs text-slate-700 hover:text-blue-900 group cursor-pointer"
                   >
                     <ProductIcon
                       name={item.name}
@@ -174,7 +186,7 @@ export default function ChatPage() {
               aria-label="AI tahlilchiga savol"
               type="text"
               disabled={isLoading}
-              placeholder="Narx tendensiyalari haqida so'rang, masalan: 'Sement narxi nega bugun oshdi?'"
+              placeholder="Narx tendensiyalari yoki valyuta haqida so'rang, masalan: 'Benzin narxi dollarda qancha?'"
               className="w-full pl-6 pr-14 py-4 bg-white/65 backdrop-blur-xl border border-white/70 rounded-full text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 shadow-2xs disabled:opacity-50 transition-all text-sm"
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -182,7 +194,7 @@ export default function ChatPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="absolute right-2 p-2.5 bg-blue-600/90 text-white rounded-full hover:bg-blue-600 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="absolute right-2 p-2.5 bg-blue-600/90 text-white rounded-full hover:bg-blue-600 transition-all shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <Send size={18} />
             </button>

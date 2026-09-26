@@ -6,10 +6,35 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: Request) {
   try {
-    const { message } = await req.json();
+    const body = await req.json();
+    const message = body?.message;
+    const currency = body?.currency === "USD" ? "USD" : "UZS";
+    let exchangeRate = Number(body?.rate) || 0;
 
     if (!message) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
+    }
+
+    // Determine exchange rate (from request or CBU API)
+    if (!exchangeRate || exchangeRate <= 0) {
+      try {
+        const cbuRes = await fetch("https://cbu.uz/uz/arkhiv-kursov-valyut/json/", {
+          headers: { Accept: "application/json" },
+          next: { revalidate: 1800 },
+        });
+        if (cbuRes.ok) {
+          const cbuData = await cbuRes.json();
+          const usd = cbuData.find((item: any) => item.Ccy === "USD");
+          if (usd && parseFloat(usd.Rate)) {
+            exchangeRate = parseFloat(usd.Rate);
+          }
+        }
+      } catch {
+        exchangeRate = 12850;
+      }
+    }
+    if (!exchangeRate || exchangeRate <= 0) {
+      exchangeRate = 12850;
     }
 
     const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL;
@@ -23,15 +48,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // --- Upgraded RAG Implementation (Both Historical & Forecast Data) ---
+    // --- Upgraded RAG Implementation (Both Historical & Forecast Data with Currency Conversion) ---
     let contextData = "";
     try {
       const dataPath = path.join(process.cwd(), "..", "data", "cleaned_data_uz.csv");
       const forecastPath = path.join(process.cwd(), "..", "data", "forecasts.csv");
       
-      const stopWords = ["salom", "assalom", "assalomu", "alaykum", "narxi", "qancha", "aytib", "bering", "iltimos", "qanday", "nima", "haqida", "bilan", "uchun", "kuningiz", "yaxshimi"];
+      const stopWords = ["salom", "assalom", "assalomu", "alaykum", "narxi", "qancha", "aytib", "bering", "iltimos", "qanday", "nima", "haqida", "bilan", "uchun", "kuningiz", "yaxshimi", "kursi", "kursini"];
       const words = message.toLowerCase().split(/[\s?.,]+/)
-        .filter((w: string) => w.length > 3 && !stopWords.includes(w));
+        .filter((w: string) => w.length > 2 && !stopWords.includes(w));
       
       if (words.length > 0 && fs.existsSync(dataPath)) {
         // 1. Read Current Market Data
@@ -55,7 +80,7 @@ export async function POST(req: Request) {
         const topMatches = Array.from(matches.values()).slice(0, 10); // Top 10 products
         
         if (topMatches.length > 0) {
-          contextData = "Here is the most relevant market data from our database based on the user's query:\n\n";
+          contextData = "Foydalanuvchi so'roviga oid UZEX tovar-xomashyo birjasi ma'lumotlari:\n\n";
           
           // 2. Try to attach Forecast Data if it exists
           let forecastData: any[] = [];
@@ -65,16 +90,28 @@ export async function POST(req: Request) {
           }
 
           topMatches.forEach(row => {
-            const price = row.Current_Price_Sum;
+            const rawPrice = row.Current_Price_Sum;
+            const numPrice = parseFloat(String(rawPrice).replace(/[\s,]/g, "")) || 0;
+            const usdPrice = (numPrice / exchangeRate).toLocaleString("en-US", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+            const uzsPriceFormatted = Number(numPrice).toLocaleString("uz-UZ");
             const change = row.Price_Change_Percent || "0";
             const unit = row.Unit || "tonna";
-            contextData += `- Product: ${row.Product_Name} (Category: ${row.Category}, Unit: ${unit})\n`;
-            contextData += `  Current Price: ${price} UZS per ${unit} (Changed by ${change}% recently).\n`;
+
+            contextData += `- Mahsulot: ${row.Product_Name} (Kategoriya: ${row.Category}, O'lchov birligi: 1 ${unit})\n`;
+            contextData += `  Joriy narx: ${uzsPriceFormatted} UZS (~ $${usdPrice} USD) 1 ${unit} uchun (Oxirgi o'zgarish: ${change}%).\n`;
             
             const forecast = forecastData.find(f => f.Product_Name === row.Product_Name && (!f.Unit || f.Unit === unit)) ||
                              forecastData.find(f => f.Product_Name === row.Product_Name);
             if (forecast) {
-              contextData += `  AI Forecast (${forecast.Forecast_Date}): Expected Median Price ${forecast.Median_Price} UZS per ${unit} (Range: ${forecast.Min_Price} - ${forecast.Max_Price}).\n`;
+              const numForecast = parseFloat(String(forecast.Median_Price).replace(/[\s,]/g, "")) || 0;
+              const usdForecast = (numForecast / exchangeRate).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              });
+              contextData += `  AI Prognozi (${forecast.Forecast_Date}): Kutilayotgan narx ${Number(numForecast).toLocaleString("uz-UZ")} UZS (~ $${usdForecast} USD) 1 ${unit} uchun (Oraliq: ${forecast.Min_Price} - ${forecast.Max_Price} UZS).\n`;
             }
             contextData += "\n";
           });
@@ -106,7 +143,19 @@ export async function POST(req: Request) {
       console.error("Error reading RAG context:", e);
     }
 
-    const systemPrompt = `You are an AI assistant specializing strictly in data, economics, and entrepreneurship. Answer the user's question directly using the provided market data if applicable. If the user's question is NOT related to data, economics, entrepreneurship, or market analysis, you MUST decline to answer and state that you only answer questions related to these topics (e.g. say "I can only answer questions related to data, economics, and entrepreneurship."). Do not use conversational filler.`;
+    const systemPrompt = `You are NarxNazar's expert AI market analyst and economic consultant specializing strictly in commodities, prices, exchange rates, data, economics, and entrepreneurship. Answer the user's questions directly in Uzbek (or the language of their message).
+
+Current Official Exchange Rate (Central Bank of Uzbekistan / O'zbekiston Markaziy Banki):
+1 USD = ${exchangeRate.toLocaleString("uz-UZ")} UZS.
+
+User's Preferred Currency: ${currency} (${currency === "USD" ? "AQSh dollari / US Dollar" : "O'zbek so'mi / Uzbek Som"}).
+
+Currency Rules:
+- If the user's preferred currency is USD, or if they ask about prices in USD / dollars, calculate and present the prices in USD using the official rate (${exchangeRate.toLocaleString("uz-UZ")} UZS per 1 USD).
+- Provide dual pricing where helpful (e.g. "$715.38 USD (9,192,600 UZS)") so the user has full clarity.
+- If asked about exchange rates, currency trends, or devaluation/inflation impact, provide accurate insights based on the official CBU rate (1 USD = ${exchangeRate.toLocaleString("uz-UZ")} UZS).
+- If the user's question is NOT related to data, economics, commodities, exchange rates, entrepreneurship, or market analysis, decline politely in Uzbek stating you only specialize in economic and market analysis.
+- Do not use conversational filler. Be clear, accurate, and concise with structured markdown tables or bullet points when comparing commodities.`;
     
     const systemContent = contextData 
       ? `${systemPrompt}\n\n${contextData}`
@@ -154,7 +203,7 @@ export async function POST(req: Request) {
     let reply = data.choices?.[0]?.message?.content || data.message?.content || data.response || "";
     reply = reply.replace(/APST/g, "'");
     
-    return NextResponse.json({ reply });
+    return NextResponse.json({ reply, currency, rate: exchangeRate });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json(

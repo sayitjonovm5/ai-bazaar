@@ -6,8 +6,11 @@ import { useSession } from "next-auth/react";
 import { Loader2, TrendingUp, Package, Calendar, MoreHorizontal, Search, Sparkles, Store } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import ProductIcon from "@/components/ProductIcon";
+import { useCurrency } from "@/lib/currency-context";
+import CurrencyToggle from "@/components/CurrencyToggle";
 
 export default function Dashboard() {
+  const { formatPrice, currencyCode, currency, rate } = useCurrency();
   const [pinnedProducts, setPinnedProducts] = useState<any[]>([]);
   const [marketIndexData, setMarketIndexData] = useState<any[]>([]);
   const [avgGrowth, setAvgGrowth] = useState<number>(0);
@@ -165,6 +168,8 @@ export default function Dashboard() {
 
         {/* Right Search & Controls */}
         <div className="flex flex-wrap items-center gap-3">
+          <CurrencyToggle size="sm" />
+
           <div className="relative flex-1 sm:w-64">
             <input 
               type="text"
@@ -344,9 +349,9 @@ export default function Dashboard() {
                     <div className="flex items-baseline justify-between mb-4 mt-2 pt-2 border-t border-slate-100/80">
                       <div>
                         <span className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                          {p.currentPrice.toLocaleString()}
+                          {formatPrice(p.currentPrice)}
                         </span>
-                        <span className="text-xs font-semibold text-slate-400 ml-1">UZS</span>
+                        <span className="text-xs font-semibold text-slate-400 ml-1">{currencyCode}</span>
                       </div>
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${p.changePercent >= 0 ? 'bg-emerald-500/15 text-emerald-700 border border-emerald-500/20' : 'bg-rose-500/15 text-rose-700 border border-rose-500/20'}`}>
                         {p.changePercent > 0 ? "+" : ""}{p.changePercent}%
@@ -379,7 +384,7 @@ export default function Dashboard() {
                               fontSize: '12px',
                               fontWeight: '600'
                             }}
-                            formatter={(value: any) => [`${Number(value || 0).toLocaleString()} UZS`, 'Narx']}
+                            formatter={(value: any) => [`${formatPrice(value)} ${currencyCode}`, 'Narx']}
                           />
                           <Area type="monotone" dataKey="historical" stroke="#2563eb" strokeWidth={2.5} fillOpacity={1} fill={`url(#colorHist${idx})`} connectNulls />
                           <Area type="monotone" dataKey="forecastMedian" stroke="#10b981" strokeWidth={2.5} strokeDasharray="4 4" fillOpacity={1} fill={`url(#colorFore${idx})`} connectNulls />

@@ -5,6 +5,7 @@ import { Search, X, DollarSign, Coins, RefreshCw } from "lucide-react";
 import { useState, Suspense, useEffect } from "react";
 import { useCurrency, type Currency } from "@/lib/currency-context";
 import { MARKETPLACE_CATEGORIES } from "@/lib/product-categories";
+import CurrencyToggle from "@/components/CurrencyToggle";
 
 function FilterBarContent() {
   const router = useRouter();
@@ -78,40 +79,7 @@ function FilterBarContent() {
         </form>
 
         {/* Currency Switcher Pill for Marketplace */}
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-white/70 backdrop-blur-xl border border-white/80 p-1 rounded-2xl shadow-2xs">
-          <span className="text-xs font-semibold text-slate-500 px-2 flex items-center gap-1">
-            <Coins className="w-3.5 h-3.5 text-blue-600" />
-            Valyuta:
-          </span>
-          <button
-            type="button"
-            onClick={() => setCurrency("UZS")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              currency === "UZS"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-            }`}
-          >
-            UZS (so'm)
-          </button>
-          <button
-            type="button"
-            onClick={() => setCurrency("USD")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1 ${
-              currency === "USD"
-                ? "bg-blue-600 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-white/60"
-            }`}
-          >
-            <DollarSign className="w-3 h-3" />
-            USD ($)
-          </button>
-          {rate && (
-            <span className="text-[11px] text-slate-400 border-l border-slate-200/80 pl-2 pr-2 hidden md:inline">
-              1 USD = {rate.toLocaleString("uz-UZ")} UZS
-            </span>
-          )}
-        </div>
+        <CurrencyToggle />
       </div>
 
       {/* Category Filter Pills */}
