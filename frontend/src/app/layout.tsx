@@ -1,22 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import "@fontsource-variable/geist";
 import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import Providers from "@/components/Providers";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 export const metadata: Metadata = {
   title: "NarxNazar",
-  description: "AI-Powered Market Intelligence, Pricing, and B2B Procurement Platform",
+  description:
+    "AI-Powered Market Intelligence, Pricing, and B2B Procurement Platform",
 };
 
 export default function RootLayout({
@@ -25,14 +16,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="flex h-screen bg-gray-50 overflow-hidden">
+    <html lang="uz" className="h-full antialiased">
+      <body className="flex h-dvh overflow-hidden">
         <Providers>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:rounded-lg focus:bg-white focus:p-3"
+          >
+            Asosiy tarkibga o‘tish
+          </a>
           <Sidebar />
-          <main className="flex-1 overflow-y-auto p-8">
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="app-main min-w-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6 lg:p-8 xl:px-10"
+          >
             {children}
           </main>
         </Providers>

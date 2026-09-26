@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Send, Bot, User, Sparkles } from "lucide-react";
 import ProductIcon from "@/components/ProductIcon";
 
@@ -9,35 +9,47 @@ export default function ChatPage() {
     {
       id: 1,
       role: "assistant",
-      content: "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so'rashingiz mumkin.",
+      content:
+        "Salom! Men NarxNazar bozor AI tahlilchisiman. Mendan joriy narxlar, bozor tendensiyalari yoki ta'minotchilar taqqoslovi haqida so‘rashingiz mumkin.",
     },
   ]);
+  const endRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ block: "nearest" });
+  }, [messages, isLoading]);
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
 
     const userMessage = input.trim();
-    setMessages(prev => [...prev, { id: Date.now(), role: "user", content: userMessage }]);
+    setMessages((prev) => [
+      ...prev,
+      { id: Date.now(), role: "user", content: userMessage },
+    ]);
     setInput("");
     setIsLoading(true);
-    
+
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMessage }),
       });
-      
+
       const data = await res.json();
-      
+
       if (!res.ok) {
-        throw new Error(data.error || "AI bilan bog'lanishda xatolik yuz berdi.");
+        throw new Error(
+          data.error || "AI bilan bog'lanishda xatolik yuz berdi.",
+        );
       }
-      
-      setMessages(prev => [
+
+      setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
@@ -45,14 +57,14 @@ export default function ChatPage() {
           content: data.reply,
         },
       ]);
-    } catch (err: any) {
-      console.error(err);
-      setMessages(prev => [
+    } catch {
+      setMessages((prev) => [
         ...prev,
         {
           id: Date.now(),
           role: "assistant",
-          content: `⚠️ Error: ${err.message}`,
+          content:
+            "Hozir AI bilan bog‘lanib bo‘lmadi. Birozdan so‘ng qayta urinib ko‘ring.",
         },
       ]);
     } finally {
@@ -61,21 +73,37 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-4rem)] flex flex-col py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">AI Bozor Tahlilchisi</h1>
-        <p className="text-gray-500 mt-1">Ma'lumotlar va prognozlar haqida savollar bering</p>
+    <div className="mx-auto flex h-full min-h-[520px] max-w-4xl flex-col py-3">
+      <div className="page-heading shrink-0">
+        <h1 className="text-3xl font-bold text-gray-900">
+          AI bozor tahlilchisi
+        </h1>
+        <p className="text-gray-500 mt-1">
+          Ma’lumotlar va prognozlar haqida savollar bering
+        </p>
       </div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-sm border border-gray-200 flex flex-col overflow-hidden">
+      <div className="surface flex min-h-0 flex-1 flex-col overflow-hidden">
         {/* Chat History */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div
+          role="log"
+          aria-label="AI bilan suhbat"
+          aria-live="polite"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
+        >
           {messages.map((msg) => (
-            <div key={msg.id} className={`flex gap-4 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}>
+            <div
+              key={msg.id}
+              className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+            >
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}
+              >
                 {msg.role === "user" ? <User size={20} /> : <Bot size={20} />}
               </div>
-              <div className={`px-5 py-3 rounded-2xl max-w-[80%] ${msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-900 rounded-tl-none whitespace-pre-wrap"}`}>
+              <div
+                className={`px-5 py-3 rounded-2xl max-w-[85%] break-words text-sm leading-7 ${msg.role === "user" ? "bg-blue-600 text-white rounded-tr-none" : "bg-gray-100 text-gray-900 rounded-tl-none whitespace-pre-wrap"}`}
+              >
                 {msg.content}
               </div>
             </div>
@@ -101,7 +129,8 @@ export default function ChatPage() {
                   },
                   {
                     name: "Armatura diametri 12 mm",
-                    query: "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
+                    query:
+                      "Armatura 12mm ning oxirgi haftadagi narx o'zgarishi",
                     category: "Metallurgiya",
                   },
                   {
@@ -114,13 +143,22 @@ export default function ChatPage() {
                     key={item.query}
                     onClick={() => {
                       setInput(item.query);
+                      inputRef.current?.focus();
                     }}
                     className="flex items-center gap-3 p-3 text-left rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all text-xs text-gray-700 hover:text-blue-900 group"
                   >
-                    <ProductIcon name={item.name} category={item.category} size="sm" />
+                    <ProductIcon
+                      name={item.name}
+                      category={item.category}
+                      size="sm"
+                    />
                     <div className="min-w-0">
-                      <div className="font-semibold text-gray-900 group-hover:text-blue-600 truncate">{item.name}</div>
-                      <div className="text-gray-500 truncate mt-0.5">{item.query}</div>
+                      <div className="font-semibold text-gray-900 group-hover:text-blue-600 truncate">
+                        {item.name}
+                      </div>
+                      <div className="text-gray-500 truncate mt-0.5">
+                        {item.query}
+                      </div>
                     </div>
                   </button>
                 ))}
@@ -129,34 +167,44 @@ export default function ChatPage() {
           )}
 
           {isLoading && (
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-emerald-100 text-emerald-600">
                 <Bot size={20} />
               </div>
-              <div className="px-5 py-3 rounded-2xl max-w-[80%] bg-gray-100 text-gray-900 rounded-tl-none flex items-center gap-1">
+              <div className="px-5 py-3 rounded-2xl max-w-[85%] break-words text-sm leading-7 bg-gray-100 text-gray-900 rounded-tl-none flex items-center gap-1">
                 <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></span>
-                <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></span>
+                <span
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></span>
+                <span
+                  className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.4s" }}
+                ></span>
               </div>
             </div>
           )}
+          <div ref={endRef} />
         </div>
 
         {/* Chat Input */}
         <div className="p-4 bg-white border-t border-gray-100">
           <form onSubmit={handleSend} className="relative flex items-center">
             <input
+              ref={inputRef}
+              aria-label="AI tahlilchiga savol"
               type="text"
               disabled={isLoading}
-              placeholder="Narx tendensiyalari haqida so'rang, masalan: 'Sement narxi nega bugun oshdi?'"
-              className="w-full pl-6 pr-14 py-4 bg-gray-50 border border-gray-200 rounded-full text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm disabled:opacity-50"
+              placeholder="Bozor narxlari haqida savol yozing..."
+              className="w-full pl-4 pr-14 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm disabled:opacity-50"
               value={input}
               onChange={(e) => setInput(e.target.value)}
             />
             <button
               type="submit"
-              disabled={isLoading}
-              className="absolute right-2 p-2.5 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Savolni yuborish"
+              disabled={isLoading || !input.trim()}
+              className="absolute right-2 p-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={20} />
             </button>

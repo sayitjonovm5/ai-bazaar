@@ -78,7 +78,7 @@ export async function GET(request: Request, props: { params: Promise<{ id: strin
     productHistory = productHistory.slice(-20);
     
     // Format for Recharts
-    const chartData = productHistory.map(h => ({
+    const chartData: any[] = productHistory.map(h => ({
       date: h.date,
       historical: h.price
     }));

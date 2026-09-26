@@ -44,7 +44,7 @@ export async function POST(req: Request) {
           const name = row.Product_Name.toLowerCase();
           const cat = (row.Category || "").toLowerCase();
           
-          if (words.some(word => name.includes(word) || cat.includes(word))) {
+          if (words.some((word: string) => name.includes(word) || cat.includes(word))) {
             // Keep overwriting so we get the latest row (assuming chronological)
             matches.set(row.Product_Name, row);
           }
@@ -82,20 +82,25 @@ export async function POST(req: Request) {
       console.error("Error reading RAG context:", e);
     }
 
-    const systemPrompt = `You are a strict data extraction AI. Answer the user's question directly using ONLY the provided market data. Do not use conversational filler. Do not say "I am ready" or "Here is the data". Just give the final answer immediately.`;
+    const systemPrompt = `You are an AI assistant specializing strictly in data, economics, and entrepreneurship. Answer the user's question directly using the provided market data if applicable. If the user's question is NOT related to data, economics, entrepreneurship, or market analysis, you MUST decline to answer and state that you only answer questions related to these topics (e.g. say "I can only answer questions related to data, economics, and entrepreneurship."). Do not use conversational filler.`;
     
-    const finalPrompt = contextData 
-      ? `${systemPrompt}\n\n${contextData}\nUser Question: ${message}\nAnswer:` 
-      : `${systemPrompt}\n\nUser Question: ${message}\nAnswer:`;
+    const systemContent = contextData 
+      ? `${systemPrompt}\n\n${contextData}`
+      : systemPrompt;
 
-    const response = await fetch(OLLAMA_BASE_URL, {
+    const chatUrl = OLLAMA_BASE_URL.replace('/api/generate', '/api/chat');
+
+    const response = await fetch(chatUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model: OLLAMA_MODEL,
-        prompt: finalPrompt,
+        messages: [
+          { role: "system", content: systemContent },
+          { role: "user", content: message }
+        ],
         stream: false,
         options: {
           num_ctx: 2048
@@ -115,7 +120,7 @@ export async function POST(req: Request) {
     const data = await response.json();
     
     // Clean up APST token artifacts from the custom Uzbek model
-    let reply = data.response || "";
+    let reply = data.message?.content || data.response || "";
     reply = reply.replace(/APST/g, "'");
     
     return NextResponse.json({ reply });

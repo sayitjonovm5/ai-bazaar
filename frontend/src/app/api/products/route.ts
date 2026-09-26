@@ -24,7 +24,19 @@ export async function GET() {
       
       const isForward = row.Product_Name.toLowerCase().includes('(forvard)');
       const contractType = isForward ? "Forvard" : "Spot";
-      const cleanName = row.Product_Name.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
+      let cleanName = row.Product_Name.replace(/\s*\(\s*Forvard\s*\)/gi, '').trim();
+
+      // Translations
+      cleanName = cleanName.replace(/Avtobenzin/gi, "Benzin")
+                   .replace(/Ammiachnaya selitra/gi, "Ammiakli selitra")
+                   .replace(/Alyumin kompozitnaya panel/gi, "Alyuminiy kompozit panel")
+                   .replace(/Amiak vodniy/gi, "Suvli ammiak")
+                   .replace(/Azot gazoobrazniy/gi, "Gaz holatidagi azot")
+                   .replace(/Azot jidkiy/gi, "Suyuq azot")
+                   .replace(/Ammiak bezvodniy/gi, "Suvsiz ammiak")
+                   .replace(/Balka \(Dvutavr\)/gi, "Balka (I-nur)")
+                   .replace(/Krug g\.k/gi, "Doira g.k")
+                   .replace(/Truba stalnaya/gi, "Po'lat quvur");
       
       const unit = row.Unit || "tonna";
       const key = `${row.Product_Name}__${unit}`;
@@ -33,16 +45,17 @@ export async function GET() {
         productMap.set(key, {
           id: unit !== "tonna" ? `${row.Product_Name}?unit=${encodeURIComponent(unit)}` : row.Product_Name,
           name: cleanName,
-          category: row.Category || "Other",
+          category: row.Category || "Boshqa",
           contractType: contractType,
           unit: unit,
           currentPrice: price,
           changePercent: parseFloat(row.Price_Change_Percent) || 0,
-          historicalPrices: [price],
+          historicalPrices: [price], // Will build this up
         });
       } else {
         const p = productMap.get(key);
         p.historicalPrices.push(price);
+        // Assuming data is chronological, the last seen is the current price
         p.currentPrice = price;
         p.changePercent = parseFloat(row.Price_Change_Percent) || 0;
       }

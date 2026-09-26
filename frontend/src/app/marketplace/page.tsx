@@ -1,110 +1,179 @@
 import { prisma } from "@/lib/prisma";
+import ImageFallback from "@/components/ImageFallback";
 import ProductIcon from "@/components/ProductIcon";
-import { User, Phone, Calendar, Store } from "lucide-react";
+import { User, Phone, Calendar, Store, Plus, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import MarketplaceSearch from "./MarketplaceSearch";
+import { formatPrice, formatDate } from "@/lib/market-ui";
 
-export default async function MarketplacePage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const resolvedSearchParams = await searchParams;
-  const q = resolvedSearchParams?.q || "";
+export default async function MarketplacePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const q = (await searchParams).q?.trim() || "";
   const offers = await prisma.supplierOffer.findMany({
-    where: q ? {
-      OR: [
-        { productName: { contains: q } },
-        { companyName: { contains: q } },
-        { description: { contains: q } }
-      ]
-    } : undefined,
+    where: q
+      ? {
+          OR: [
+            { productName: { contains: q } },
+            { companyName: { contains: q } },
+            { description: { contains: q } },
+          ],
+        }
+      : undefined,
     orderBy: { createdAt: "desc" },
-    include: { user: true }
+    include: { user: true },
   });
-
   return (
-    <div className="max-w-7xl mx-auto py-8">
-      <div className="mb-8 bg-white p-8 rounded-3xl border border-gray-100 shadow-sm relative overflow-hidden">
-        
-        <div className="absolute top-8 right-8 z-20 flex flex-col gap-3">
-          <Link href="/marketplace/add" className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition-colors shadow-sm">
-            + Taklif qo'shish
-          </Link>
-          <Link href="/profile" className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-5 py-2.5 rounded-xl text-sm font-medium transition-colors text-center shadow-sm">
-            Profilni tahrirlash
-          </Link>
+    <div className="page-shell">
+      <header className="surface relative mb-7 overflow-hidden p-5 sm:p-7">
+        <div className="relative z-10 flex flex-col justify-between gap-5 md:flex-row md:items-start">
+          <div className="min-w-0 max-w-2xl">
+            <div className="eyebrow">Biznes uchun hamkorlik</div>
+            <h1 className="text-2xl font-semibold sm:text-3xl">
+              B2B Marketplace
+            </h1>
+            <p className="mt-3 max-w-xl text-sm text-gray-500">
+              Ta’minotchilar takliflarini bir joyda ko‘ring. Narxlarni
+              solishtiring va hamkorlar bilan bog‘laning.
+            </p>
+          </div>
+          <div className="flex shrink-0 flex-wrap gap-2 md:flex-col">
+            <Link href="/marketplace/add" className="button-primary">
+              <Plus size={16} />
+              Taklif qo‘shish
+            </Link>
+            <Link href="/profile" className="button-secondary">
+              <User size={15} />
+              Profilni tahrirlash
+            </Link>
+          </div>
         </div>
-        <div className="relative z-10">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">B2B Marketplace</h1>
-          <p className="text-gray-500 max-w-2xl text-lg">
-            Barcha mahsulotlar uchun global ta'minotchilar takliflari bir joyda. Eng yaxshi narxlarni toping va ishonchli hamkorlar bilan bog'laning.
-          </p>
-        </div>
-        <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none">
-           <Store className="w-48 h-48" />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {offers.map((offer: any) => (
-          <div key={offer.id} className="group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-gray-50 flex items-center justify-between bg-gray-50/50">
-              <div className="flex items-center gap-3">
+        <MarketplaceSearch />
+      </header>
+      <p className="mb-4 text-xs text-gray-500">
+        <span className="font-semibold text-gray-900">{offers.length}</span> ta
+        taklif{q ? " topildi" : " mavjud"}
+      </p>
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        {offers.map((offer) => (
+          <article
+            key={offer.id}
+            className="surface group flex min-w-0 flex-col overflow-hidden transition-shadow hover:shadow-md"
+          >
+            <div className="flex items-center justify-between gap-2 border-b border-gray-100 bg-gray-50/50 p-4">
+              <div className="flex min-w-0 items-center gap-2.5">
                 <ProductIcon name={offer.productName} size="sm" />
-                <span className="font-medium text-sm text-gray-700 truncate max-w-[120px]">{offer.productName}</span>
+                <span
+                  className="truncate text-xs font-medium text-gray-700"
+                  title={offer.productName}
+                >
+                  {offer.productName}
+                </span>
               </div>
-              <Link href={`/product/${encodeURIComponent(offer.productName)}`} className="text-xs text-blue-600 hover:underline">
-                Tahlil &rarr;
+              <Link
+                href={"/product/" + encodeURIComponent(offer.productName)}
+                aria-label={offer.productName + ": tahlil"}
+                className="shrink-0 rounded-lg p-2 text-blue-600 hover:bg-blue-50"
+              >
+                <ArrowUpRight size={16} />
               </Link>
             </div>
-            
             {offer.imageUrl ? (
-              <div className="w-full h-48 bg-gray-100 relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={offer.imageUrl} alt={offer.companyName} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              <div className="h-44 w-full overflow-hidden bg-gray-100">
+                <ImageFallback
+                  key={offer.imageUrl}
+                  src={offer.imageUrl}
+                  alt={offer.productName}
+                  className="h-full w-full object-cover"
+                  fallback={
+                    <div className="flex h-full items-center justify-center bg-gray-50">
+                      <ProductIcon name={offer.productName} size="xl" />
+                    </div>
+                  }
+                />
               </div>
             ) : (
-              <div className="w-full h-32 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-                 <ProductIcon name={offer.productName} size="xl" showCategoryHint={false} />
+              <div className="flex h-44 items-center justify-center bg-gray-50">
+                <ProductIcon
+                  name={offer.productName}
+                  size="xl"
+                  showCategoryHint={false}
+                />
               </div>
             )}
-
-            
-            <div className="p-5 flex-1 flex flex-col">
-              <div className="flex items-center gap-3 mb-4 border-b border-gray-50 pb-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 flex-shrink-0 flex items-center justify-center">
+            <div className="flex flex-1 flex-col p-5">
+              <div className="mb-4 flex items-center gap-2.5 border-b border-gray-100 pb-4">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200 bg-gray-50">
                   {offer.user?.profilePicture ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={offer.user.profilePicture} alt="User" className="w-full h-full object-cover" />
+                    <ImageFallback
+                      key={offer.user.profilePicture}
+                      src={offer.user.profilePicture}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      fallback={<User size={15} className="text-gray-400" />}
+                    />
                   ) : (
-                    <User className="w-5 h-5 text-gray-400" />
+                    <User size={15} className="text-gray-400" />
                   )}
                 </div>
-                <div>
-                  <p className="text-xs text-gray-400">Sotuvchi</p>
-                  <p className="text-sm font-medium text-gray-800 line-clamp-1">{offer.user?.name || "Foydalanuvchi"}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] text-gray-500">Sotuvchi</p>
+                  <p className="truncate text-xs font-medium">
+                    {offer.user?.name || "Foydalanuvchi"}
+                  </p>
                 </div>
               </div>
-  
-              <h3 className="font-bold text-gray-900 text-lg mb-1">{offer.companyName}</h3>
-              <p className="text-2xl font-bold text-emerald-600 mb-4">{Number(offer.price).toLocaleString()} UZS</p>
-              
-              <p className="text-sm text-gray-600 mb-6 flex-1 line-clamp-3">{offer.description}</p>
-              
-              <div className="flex flex-col gap-3 mt-auto">
-                <a href={`tel:${offer.contact}`} className="flex items-center justify-center w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white transition-colors rounded-xl font-medium text-sm gap-2">
-                  <Phone className="w-4 h-4" />
-                  {offer.contact}
-                </a>
-                <div className="flex items-center text-xs text-gray-400 justify-between">
-                  <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {new Date(offer.createdAt).toLocaleDateString()}</span>
-                </div>
+              <h2 className="mb-1 break-words text-sm font-semibold">
+                {offer.companyName}
+              </h2>
+              <p className="mb-4 break-words text-xl font-semibold tracking-tight tabular-nums">
+                {formatPrice(offer.price)}{" "}
+                <span className="text-xs font-normal text-gray-500">UZS</span>
+              </p>
+              <p className="mb-5 line-clamp-3 flex-1 text-xs text-gray-500">
+                {offer.description ||
+                  "Qo‘shimcha ma’lumot uchun sotuvchi bilan bog‘laning."}
+              </p>
+              <div className="mt-auto flex flex-col gap-3">
+                {offer.phoneNumber ? (
+                  <a
+                    href={"tel:" + offer.phoneNumber}
+                    className="flex min-h-10 items-center justify-center gap-2 rounded-lg bg-blue-50 px-2 text-xs font-semibold text-blue-700 hover:bg-blue-600 hover:text-white"
+                  >
+                    <Phone size={14} />
+                    {offer.phoneNumber}
+                  </a>
+                ) : (
+                  <span className="text-xs text-gray-500">
+                    Telefon ko‘rsatilmagan
+                  </span>
+                )}
+                <span className="flex items-center gap-1.5 text-[10px] text-gray-500">
+                  <Calendar size={12} />
+                  {formatDate(offer.createdAt.toISOString())}
+                </span>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
-      
-      {offers.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-3xl border border-gray-100 border-dashed">
-           <h3 className="text-xl font-medium text-gray-500">Hozircha hech qanday taklif yo'q</h3>
+      {!offers.length && (
+        <div className="surface empty-state">
+          <Store />
+          <h2>{q ? "Mos taklif topilmadi" : "Hozircha takliflar yo‘q"}</h2>
+          <p>
+            {q
+              ? "Boshqa mahsulot yoki kompaniya nomi bilan qidirib ko‘ring."
+              : "Birinchi taklifni joylang va mahsulotingizni xaridorlarga tanishtiring."}
+          </p>
+          <Link
+            href={q ? "/marketplace" : "/marketplace/add"}
+            className="button-secondary"
+          >
+            {q ? "Barcha takliflar" : "Taklif qo‘shish"}
+          </Link>
         </div>
       )}
     </div>
