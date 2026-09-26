@@ -30,6 +30,7 @@ export default function AddOfferPage() {
     whatsapp: "",
     instagram: "",
     telegram: "",
+    imageUrl: "",
   });
 
   const [showMoreContact, setShowMoreContact] = useState(false);
@@ -92,7 +93,10 @@ export default function AddOfferPage() {
         },
       );
 
-      if (!res.ok) throw new Error("Taklif qo‘shishda xatolik yuz berdi");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => null);
+        throw new Error(errData?.error || "Taklif qo‘shishda xatolik yuz berdi");
+      }
 
       router.push("/marketplace");
       router.refresh();
@@ -181,6 +185,38 @@ export default function AddOfferPage() {
           <div>
             <label className="block text-sm font-semibold text-slate-700 mb-2">Tavsif</label>
             <textarea rows={3} value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full p-3 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 outline-none text-slate-900 transition-all shadow-2xs" placeholder="Mahsulot haqida qo'shimcha ma'lumot..."></textarea>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">Mahsulot rasmi</label>
+            <input 
+              type="file" 
+              accept="image/*"
+              onChange={async (e) => {
+                if (e.target.files && e.target.files[0]) {
+                  const file = e.target.files[0];
+                  const data = new FormData();
+                  data.append("file", file);
+                  try {
+                    const res = await fetch("/api/upload", { method: "POST", body: data });
+                    const resData = await res.json();
+                    if (resData.success) {
+                      setFormData({...formData, imageUrl: resData.url});
+                    } else {
+                      alert(resData.error || "Rasm yuklashda xatolik");
+                    }
+                  } catch (err) {
+                    alert("Rasm yuklashda xatolik");
+                  }
+                }
+              }} 
+              className="w-full p-2 bg-white/60 backdrop-blur-md border border-white/70 rounded-xl outline-none focus:bg-white/95 focus:ring-2 focus:ring-blue-500/25 text-slate-900 transition-all shadow-2xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" 
+            />
+            {formData.imageUrl && (
+              <div className="mt-3 w-32 h-32 rounded-xl border border-slate-200 overflow-hidden relative">
+                <img src={formData.imageUrl} alt="Uploaded" className="w-full h-full object-cover" />
+              </div>
+            )}
           </div>
 
           <div className="border-t border-white/60 pt-6">
